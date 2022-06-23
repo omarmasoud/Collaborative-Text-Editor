@@ -7,8 +7,8 @@ class connection_manager:
     def __init__(self):
         self.wsconnectionurl='wss://bp491r2577.execute-api.eu-central-1.amazonaws.com/production'
         self.ws=websocket.create_connection(self.wsconnectionurl)
-        self.receiverthread=threading.Thread(target=self.reciever_function)
-        self.receiverthread.start()
+        # self.receiverthread=threading.Thread(target=self.reciever_function)
+        # self.receiverthread.start()
 
     def reciever_function(self):
         while True:

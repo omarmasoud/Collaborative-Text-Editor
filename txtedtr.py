@@ -5,6 +5,8 @@ from idlelib.redirector import WidgetRedirector
 
 from ConnectionManager import *
 
+from AWSLambdaConnectionManager import connection_manager
+
 import node
 
 def open_file():
@@ -71,15 +73,15 @@ def btn3sndbtn():
     print(txt_edit.get(1.0, "end-1c"))
     print('hi')
     txt_msg = txt_edit.get(1.0, "end-1c")
-    cm.SendMsg(txt_msg)
+    cm.BroadCast(txt_msg)
 
 def btn4cnct():
-    cm.Connect()
+    # cm.Connect()
     Thread(target=changeOccured).start()
 
 
 def btn5dscnct():
-    cm.Disconnect()
+    mg = 0
 
 counter = 0;
 
@@ -225,7 +227,7 @@ def btnaddchar(indx1, indx2):
     else:
         newChange = n.add_char_here(elem, posx, posy)
         print(newChange)
-        cm.SendMsg(newChange)
+        cm.BroadCast(newChange)
     print(n.charIdPos)
     n.printList()
 
@@ -264,7 +266,7 @@ def btndelchar(indx):
     else:
         newChange = n.del_char_here(posx, posy)
         print(newChange)
-        cm.SendMsg(newChange)
+        cm.BroadCast(newChange)
     print(n.charIdPos)
     n.printList()
 
@@ -296,7 +298,7 @@ def deleteThereTest():
 
 def changeOccured():
     while 1:
-        chnge = cm.ReceiveMsg()
+        chnge = cm.ws.recv()
         if chnge is not None:
             print(chnge)
             if len(chnge.split('&')) == 5:
@@ -340,7 +342,8 @@ def receiveChange(op, elem, parent_id, child_id, id):
 
 
 
-cm = ConnectionManager()
+# cm = ConnectionManager()
+cm = connection_manager()
 
 n = node.TextSeq()
 

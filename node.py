@@ -296,12 +296,12 @@ class TextSeq:
                     # parentidToDel = self.charPosCharr[posx][posy].parent_id
                     # childidToDel = self.charPosCharr[posx][posy].child_id
 
-                if not mnUserTany:  # AAAADDDDD 3ND D
+        if not mnUserTany:  # AAAADDDDD 3ND D
                     # TIMESTAAAMMMMPPPP
                     # change_id = datetime.timestamp(datetime.now())
-                    return ("5&" + elemToDel + "&" + str(parentidToDel) + "&" + str(childidToDel) + "&" + str(myidToDel))
-                else:
-                    return -1
+            return ("5&" + elemToDel + "&" + str(parentidToDel) + "&" + str(childidToDel) + "&" + str(myidToDel))
+        else:
+            return -1
                 #     pos = str(posx) + '.' + str(posy)
                 #     txt.insertThere(pos, elem)
 
