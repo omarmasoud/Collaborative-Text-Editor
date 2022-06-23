@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: An AWS Serverless Specification template describing your function.
+Resources:
+  CollaborativeTextEditorHandler:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.9
+      CodeUri: .
+      Description: ''
+      MemorySize: 128
+      Timeout: 3
+      Role: >-
+        arn:aws:iam::975060559191:role/service-role/Collaborative-Text-Editor-Distributed-Contributors
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /MyResource
+            Method: $disconnect
+        Api2:
+          Type: Api
+          Properties:
+            Path: /MyResource
+            Method: $default
+        Api3:
+          Type: Api
+          Properties:
+            Path: /MyResource
+            Method: $connect
+        Api4:
+          Type: Api
+          Properties:
+            Path: /MyResource
+            Method: updateAll
+        Api5:
+          Type: Api
+          Properties:
+            Path: /MyResource
+            Method: setName
+        Api6:
+          Type: Api
+          Properties:
+            Path: /MyResource
+            Method: GetDocument
+        Api7:
+          Type: Api
+          Properties:
+            Path: /MyResource
+            Method: setPosition
