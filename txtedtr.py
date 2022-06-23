@@ -239,9 +239,45 @@ def on_insert(*args):
     indx2 = txt_edit.index(args[0])
     btnaddchar(indx1, indx2)
 
+
+def btndelchar(indx):
+    global mnUserTany
+    global charId
+    # get position l cursor
+    # print(txt_edit.index(tk.INSERT))
+    x = indx
+
+    posx = int(x.split('.')[0])
+    posy = int(x.split('.')[1])
+    print(posx)
+    print(posy)
+
+    # mfish fl del msh h3rf l elem
+    # ind = str(posx) + '.' + str(posy)
+    # print(txt_edit.get(ind))
+    # elem = txt_edit.get(ind)
+
+    print(n.charIdPos)
+    if mnUserTany:
+        n.del_char_here(posx, posy, 1, charId)
+        mnUserTany = 0
+    else:
+        newChange = n.del_char_here(posx, posy)
+        print(newChange)
+        cm.SendMsg(newChange)
+    print(n.charIdPos)
+    n.printList()
+
+
+
 def on_delete(*args):
     print ("DEL:", list(map(txt_edit.index, args)))
+    indx = list(map(txt_edit.index, args))
     old_delete(*args)
+    print("hi, ", indx[0])
+    # l index l tany indx[1]
+    btndelchar(indx[0])
+    # DOESN'T HANDLE MORE THAN ONE CHAR DEL YET. ALSO ADD CAN GET THE INDEX BUT NOT HANDLED
 
 
 def btn13anthr():
@@ -252,39 +288,54 @@ def btn13anthr():
 def insertThere(pos, elem):
     txt_edit.insert(pos, elem)
 
+def deleteThere(pos):
+    txt_edit.delete(pos)
+
+def deleteThereTest():
+    txt_edit.delete('1.2')
+
 def changeOccured():
     while 1:
         chnge = cm.ReceiveMsg()
         if chnge is not None:
             print(chnge)
             if len(chnge.split('&')) == 5:
-                receiveChange(chnge.split('&')[1],
+                receiveChange(chnge.split('&')[0],
+                              chnge.split('&')[1],
                               chnge.split('&')[2] if chnge.split('&')[2] == 'None' else float(chnge.split('&')[2]),
                               chnge.split('&')[3] if chnge.split('&')[3] == 'None' else float(chnge.split('&')[3]),
                               float(chnge.split('&')[4]))
 
 
-def receiveChange(elem, parent_id, child_id, id):
+def receiveChange(op, elem, parent_id, child_id, id):
     global mnUserTany
     global charId
     charId = id
     mnUserTany = 1
 
-    if child_id == 'None':
-        if parent_id == 'None':
-            # insertThere('1.0', elem)
-            insertThere(str(len(n.charPosCharr)-1)+'.'+str('0'), elem)
+    if op != '5': # add not delete
+        if child_id == 'None':
+            if parent_id == 'None':
+                # insertThere('1.0', elem)
+                # insertThere(str('1')+'.'+str('0'), elem) # 25ALLY DI 1,0 34AN MSH HA HANDLEHA FL DELETE
+                insertThere(str(len(n.charPosCharr)-1)+'.'+str('0'), elem)
+            else:
+                parent_pos = n.charIdPos[parent_id]
+                # parentposx = int(parent_pos.split('.')[0])
+                # parentposy = int(parent_pos.split('.')[1])
+                posy = parent_pos[1] + 1
+                pos = str(parent_pos[0]) + '.' + str(posy)
+                insertThere(pos, elem)
         else:
-            parent_pos = n.charIdPos[parent_id]
-            # parentposx = int(parent_pos.split('.')[0])
-            # parentposy = int(parent_pos.split('.')[1])
-            posy = parent_pos[1] + 1
-            pos = str(parent_pos[0]) + '.' + str(posy)
+            child_pos = n.charIdPos[child_id]
+            pos = str(child_pos[0]) + '.' + str(child_pos[1])
             insertThere(pos, elem)
     else:
-        child_pos = n.charIdPos[child_id]
-        pos = str(child_pos[0]) + '.' + str(child_pos[1])
-        insertThere(pos, elem)
+        # don't need parent/child. only id
+        # mmkn ml2ihush??? try except
+        charDelPos = n.charIdPos[id]
+        pos = str(charDelPos[0]) + '.' + str(charDelPos[1])
+        deleteThere(pos)
 
 
 
@@ -314,6 +365,7 @@ btn_10 = tk.Button(fr_buttons, text="Modified?", command=btn10chckmod)
 btn_11 = tk.Button(fr_buttons, text="Consistency Prob?", command=btn11fixprob)
 btn_12 = tk.Button(fr_buttons, text="Start writing", command=btn12strtwrtng)
 btn_13 = tk.Button(fr_buttons, text="USER TANY 7T H", command=btn13anthr)
+btn_14 = tk.Button(fr_buttons, text="delete pos 1.2", command=deleteThereTest)
 
 
 btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
@@ -330,6 +382,7 @@ btn_10.grid(row=10, column=0, sticky="ew", padx=5)
 btn_11.grid(row=11, column=0, sticky="ew", padx=5)
 btn_12.grid(row=12, column=0, sticky="ew", padx=5)
 btn_13.grid(row=13, column=0, sticky="ew", padx=5)
+btn_14.grid(row=14, column=0, sticky="ew", padx=5)
 
 #lw l text deleted cursor position????
 
