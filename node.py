@@ -141,10 +141,36 @@ class TextSeq:
             if wATCHOUT_NEWLINE:
                 print("CAME HERE")
                 wATCHOUT_NEWLINE = 0
-                return ("1&" + elem + "&" + str(parent_id) + "&" + str(newline_child) + "&" + str(my_id))
+                change_id = datetime.timestamp(datetime.now())
+    
+                obj={
+                "operation":"ins",
+                "elem":str(elem),
+                "parent_id":str(parent_id),
+                "child_id":str(newline_child),
+                "my_id":str(my_id),
+                "change_id":str(change_id),
+                "lastRcvdChnge": " "
+                }
+                
+                # return ("1&" + elem + "&" + str(parent_id) + "&" + str(newline_child) + "&" + str(my_id))
+                return obj
 
             else:
-                 return ("1&"+elem+"&"+str(parent_id)+"&"+str(child_id)+"&"+str(my_id))
+                change_id = datetime.timestamp(datetime.now())
+                obj={
+                "operation":"ins",
+                "elem":str(elem),
+                "parent_id":str(parent_id),
+                "child_id":str(child_id),
+                "my_id":str(my_id),
+                "change_id":str(change_id),
+                "lastRcvdChnge": " "
+                }
+                
+                # return ("1&" + elem + "&" + str(parent_id) + "&" + str(newline_child) + "&" + str(my_id))
+                return obj
+                #return ("1&"+elem+"&"+str(parent_id)+"&"+str(child_id)+"&"+str(my_id))
         else:
             return -1
         #     pos = str(posx) + '.' + str(posy)
@@ -299,7 +325,20 @@ class TextSeq:
         if not mnUserTany:  # AAAADDDDD 3ND D
                     # TIMESTAAAMMMMPPPP
                     # change_id = datetime.timestamp(datetime.now())
-            return ("5&" + elemToDel + "&" + str(parentidToDel) + "&" + str(childidToDel) + "&" + str(myidToDel))
+            change_id = datetime.timestamp(datetime.now())
+            obj={
+                "operation":"del",
+                "elem":str(elemToDel),
+                "parent_id":str(parentidToDel),
+                "child_id":str(childidToDel),
+                "my_id":str(myidToDel),
+                "change_id":str(change_id),
+                "lastRcvdChnge": " "
+                }
+                
+                # return ("1&" + elem + "&" + str(parent_id) + "&" + str(newline_child) + "&" + str(my_id))
+            return obj
+            # return ("5&" + elemToDel + "&" + str(parentidToDel) + "&" + str(childidToDel) + "&" + str(myidToDel))
         else:
             return -1
                 #     pos = str(posx) + '.' + str(posy)

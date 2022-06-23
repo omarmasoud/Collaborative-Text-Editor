@@ -9,6 +9,11 @@ from AWSLambdaConnectionManager import connection_manager
 
 import node
 
+import json
+
+
+lastRcvdChnge = -1
+
 def open_file():
 
     """Open a file for editing."""
@@ -205,6 +210,7 @@ mnUserTany = 0
 charId = '400'
 
 def btnaddchar(indx1, indx2):
+    global lastRcvdChnge
     global mnUserTany
     global charId
     # get position l cursor
@@ -226,8 +232,9 @@ def btnaddchar(indx1, indx2):
         mnUserTany = 0
     else:
         newChange = n.add_char_here(elem, posx, posy)
+        newChange['lastRcvdChnge'] = str(lastRcvdChnge)
         print(newChange)
-        cm.BroadCast(newChange)
+        cm.BroadCast(json.dumps(newChange))
     print(n.charIdPos)
     n.printList()
 
@@ -245,6 +252,7 @@ def on_insert(*args):
 def btndelchar(indx):
     global mnUserTany
     global charId
+    global lastRcvdChnge
     # get position l cursor
     # print(txt_edit.index(tk.INSERT))
     x = indx
@@ -265,8 +273,9 @@ def btndelchar(indx):
         mnUserTany = 0
     else:
         newChange = n.del_char_here(posx, posy)
+        newChange['lastRcvdChnge'] = str(lastRcvdChnge)
         print(newChange)
-        cm.BroadCast(newChange)
+        cm.BroadCast(json.dumps(newChange))
     print(n.charIdPos)
     n.printList()
 
@@ -297,16 +306,39 @@ def deleteThereTest():
     txt_edit.delete('1.2')
 
 def changeOccured():
+    global lastRcvdChnge
     while 1:
         chnge = cm.ws.recv()
-        if chnge is not None:
-            print(chnge)
-            if len(chnge.split('&')) == 5:
-                receiveChange(chnge.split('&')[0],
-                              chnge.split('&')[1],
-                              chnge.split('&')[2] if chnge.split('&')[2] == 'None' else float(chnge.split('&')[2]),
-                              chnge.split('&')[3] if chnge.split('&')[3] == 'None' else float(chnge.split('&')[3]),
-                              float(chnge.split('&')[4]))
+        print(chnge)
+        chnge=json.loads(chnge)
+        #if 
+        if (chnge["delta"] is not None):#and (chnge["freeze"] !="false"):
+            chnge=json.loads(chnge["delta"] )
+            # if chnge.has_key("operation"):
+            if "operation" in chnge:
+            #if chnge["operation"] == "ins" or chnge["operation"] == "del":
+                receiveChange(chnge["operation"], 
+                            chnge["elem"],
+                            chnge["parent_id"] if chnge["parent_id"] == 'None' else float(chnge["parent_id"]),
+                            chnge["child_id"] if chnge["child_id"] == 'None' else float(chnge["child_id"]),
+                            float(chnge["my_id"]))
+                lastRcvdChnge = chnge["change_id"]
+                
+        # if chnge is not None:
+        #     print(chnge)
+        #     if len(chnge.split('&')) == 5:
+        #         receiveChange(chnge.split('&')[0],
+        #                       chnge.split('&')[1],
+        #                       chnge.split('&')[2] if chnge.split('&')[2] == 'None' else float(chnge.split('&')[2]),
+        #                       chnge.split('&')[3] if chnge.split('&')[3] == 'None' else float(chnge.split('&')[3]),
+        #                       float(chnge.split('&')[4]))
+        # "operation":"ins",
+        #         "elem":str(elem),
+        #         "parent_id":str(parent_id),
+        #         "child_id":str(newline_child),
+        #         "my_id":str(my_id),
+        #         "change_id":str(change_id),
+        #         "lastRcvdChnge": " "
 
 
 def receiveChange(op, elem, parent_id, child_id, id):
@@ -315,7 +347,7 @@ def receiveChange(op, elem, parent_id, child_id, id):
     charId = id
     mnUserTany = 1
 
-    if op != '5': # add not delete
+    if op == "ins": # add not delete
         if child_id == 'None':
             if parent_id == 'None':
                 # insertThere('1.0', elem)
