@@ -232,11 +232,13 @@ class Application(tk.Frame):
         tk.Frame.__init__(self)
         self.chngeBuffer = list()
         self.localBuffer = list()
+        self.chngesBroadcastByMe = {} #JSONDUMPS lw l msg list b awl id aw 2a5r id which?
 
         self._after_id = None
 
         self.counter = 0
         self.end = 0
+        self.justSent = ""
 
     def handle_wait(self):
         # cancel the old job
@@ -249,6 +251,7 @@ class Application(tk.Frame):
     def sendNow(self, i):
         print(i)
         print(self.localBuffer[i:i + 4])
+
         # i = self.counter
         # if self.counter < len(self.localBuffer):
         #     print("LOOOOK", self.localBuffer[i:i + 4])
@@ -258,33 +261,89 @@ class Application(tk.Frame):
         # 8:12
         # 0 4
         if (len(self.localBuffer) - i) >= 4:
+            lastChnge = json.loads(self.chngeBuffer.pop(i+3))
+            lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(
+                list(self.chngesBroadcastByMe)) > 0 else -1
+            # self.chngeBuffer.append(json.dumps(lastChnge))
+            self.chngeBuffer.insert(i+3, json.dumps(lastChnge))
+
             cm.BroadCast(self.localBuffer[i:i + 4])
+            # 23MLHA REGISTER FL SENT
+            self.justSent = json.loads(self.localBuffer[i+3])["change_id"]
+            print(self.justSent)
+
+            self.chngesBroadcastByMe[json.loads(self.localBuffer[i + 3])["change_id"]] = self.localBuffer[i:i + 4]
         else:
+            lastChnge = json.loads(self.chngeBuffer.pop(len(self.localBuffer)-1))
+            lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(
+                list(self.chngesBroadcastByMe)) > 0 else -1
+            self.chngeBuffer.append(json.dumps(lastChnge))
+
             cm.BroadCast(self.localBuffer[i:len(self.localBuffer)])
+            # 23MLHA REGISTER FL SENT
+            self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
+            print(self.justSent)
+
+            self.chngesBroadcastByMe[json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]] = self.localBuffer[i:len(self.localBuffer)]
+            print("DIIIICCCTTTT", self.chngesBroadcastByMe)
+            # clear localBuffer now
         #     self.counter += 4
         # else:
         #     self.counter = 0
 
     def send_change(self):
-        # global buffEnable
-        # buffEnable = 1
-        # for i in range(len(self.chngeBuffer)):
-            # cm.BroadCast(json.dumps(self.chngeBuffer[i]))
-        # 0 1 2 3 4
-        if len(self.chngeBuffer) > 4:
-            i = 0
-            j = 0
-            self.localBuffer = self.chngeBuffer.copy()
-            while i < len(self.localBuffer):
-                # self.after(j, self.sendNow)
-                self.after(j, lambda x=i: self.sendNow(x))
-                i += 4
-                j += 700
-            self.end = i - 4
+        if len(self.localBuffer) == 0 or (len(self.localBuffer) != 0 and (float(json.loads(self.localBuffer[-1])["change_id"]) <= float(self.justSent))):
+            if len(self.chngeBuffer) > 4:
+                i = 0
+                j = 0
+                self.localBuffer = self.chngeBuffer.copy()
+                while i < len(self.localBuffer):
+                    # self.after(j, self.sendNow)
+                    self.after(j, lambda x=i: self.sendNow(x))
+                    i += 4
+                    j += 700
+                self.end = i - 4
+            else:
+                #2bl l broadcast. h7ot l lastBrdcstChnge
+                lastChnge = json.loads(self.chngeBuffer.pop(-1))
+                lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(list(self.chngesBroadcastByMe)) > 0 else -1
+                self.chngeBuffer.append(json.dumps(lastChnge))
+
+                cm.BroadCast(self.chngeBuffer)
+                self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
+
+                #23MLHA REGISTER FL SENT
+                print(self.chngeBuffer)
+                print(self.chngesBroadcastByMe)
+            self.chngeBuffer.clear()
         else:
-            cm.BroadCast(self.chngeBuffer)
-                # time.sleep(0.6)
-        self.chngeBuffer.clear()
+            print("need to WAIT")
+            self.after(500, self.send_change)
+
+        # if float(json.loads(self.localBuffer[-1])["change_id"]) > float(self.justSent):
+        #     print("need to WAIT")
+        #     self.after(500, self.send_change)
+        # else:
+        #
+        #     if len(self.chngeBuffer) > 4:
+        #         i = 0
+        #         j = 0
+        #         self.localBuffer = self.chngeBuffer.copy()
+        #         while i < len(self.localBuffer):
+        #             # self.after(j, self.sendNow)
+        #             self.after(j, lambda x=i: self.sendNow(x))
+        #             i += 4
+        #             j += 700
+        #         self.end = i - 4
+        #     else:
+        #
+        #         if float(json.loads(self.localBuffer[-1])["change_id"]) > float(self.justSent):
+        #             print("need to WAIT")
+        #         print("local[-1]>justSent?", float(json.loads(self.localBuffer[-1])["change_id"]), " and ", float(self.justSent))
+        #         cm.BroadCast(self.chngeBuffer)
+        #         print(self.chngeBuffer)
+        #             # time.sleep(0.6)
+        #     self.chngeBuffer.clear()
 
 
 
@@ -300,14 +359,14 @@ def btnaddchar(indx1, indx2):
 
     posx = int(x.split('.')[0])
     posy = int(x.split('.')[1])
-    print(posx)
-    print(posy)
+    # print(posx)
+    # print(posy)
 
     ind = str(posx) + '.' + str(posy)
-    print(txt_edit.get(ind))
+    # print(txt_edit.get(ind))
     elem = txt_edit.get(ind)
 
-    print(n.charIdPos)
+    # print(n.charIdPos)
     if mnUserTany:
         n.add_char_here(elem, posx, posy, 1, charId)
         mnUserTany = 0
@@ -318,15 +377,15 @@ def btnaddchar(indx1, indx2):
         app.chngeBuffer.append(json.dumps(newChange))
         app.handle_wait()
         # cm.BroadCast(json.dumps(newChange))
-    print(n.charIdPos)
-    n.printList()
+    # print(n.charIdPos) RAGGA3
+    # n.printList() RAGGA3
 
 
 def on_insert(*args):
-    print("INS:", txt_edit.index(args[0]))
+    # print("INS:", txt_edit.index(args[0]))
     indx1 = txt_edit.index(args[0])
     old_insert(*args)
-    print(txt_edit.index(args[0]))
+    # print(txt_edit.index(args[0]))
     indx2 = txt_edit.index(args[0])
     btnaddchar(indx1, indx2)
 
@@ -342,15 +401,15 @@ def btndelchar(indx):
 
     posx = int(x.split('.')[0])
     posy = int(x.split('.')[1])
-    print(posx)
-    print(posy)
+    # print(posx)
+    # print(posy)
 
     # mfish fl del msh h3rf l elem
     # ind = str(posx) + '.' + str(posy)
     # print(txt_edit.get(ind))
     # elem = txt_edit.get(ind)
 
-    print(n.charIdPos)
+    # print(n.charIdPos) RAGGA3
     if mnUserTany:
         n.del_char_here(posx, posy, 1, charId)
         mnUserTany = 0
@@ -361,15 +420,15 @@ def btndelchar(indx):
         app.chngeBuffer.append(json.dumps(newChange))
         app.handle_wait()
         # cm.BroadCast(json.dumps(newChange))
-    print(n.charIdPos)
-    n.printList()
+    # print(n.charIdPos) RAGGA3
+    # n.printList() RAGGA3
 
 
 def on_delete(*args):
-    print("DEL:", list(map(txt_edit.index, args)))
+    # print("DEL:", list(map(txt_edit.index, args)))
     indx = list(map(txt_edit.index, args))
     old_delete(*args)
-    print("hi, ", indx[0])
+    # print("hi, ", indx[0])
     # l index l tany indx[1]
     btndelchar(indx[0])
     # DOESN'T HANDLE MORE THAN ONE CHAR DEL YET. ALSO ADD CAN GET THE INDEX BUT NOT HANDLED
