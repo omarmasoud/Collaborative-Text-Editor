@@ -11,11 +11,12 @@ import node
 
 import json
 
+import time
 
 lastRcvdChnge = -1
 
-def open_file():
 
+def open_file():
     """Open a file for editing."""
 
     txt_edit.delete(1.0, tk.END)
@@ -33,6 +34,7 @@ def open_file():
 
     print(filepath)
     txt_edit.edit_modified(0)
+
 
 def save_file():
     """Save the current file as a new file."""
@@ -53,7 +55,7 @@ def save_file():
 def btndplcte():
     print(txt_edit.get(1.0, "end-1c"))
     print(txt_edit.index(tk.INSERT))
-    x=txt_edit.index(tk.INSERT)
+    x = txt_edit.index(tk.INSERT)
 
     txt11 = txt_edit.get(1.0, "end-1c")
     txt_edit.delete(1.0, tk.END)
@@ -64,14 +66,9 @@ def btndplcte():
     txt_edit.mark_set("insert", "%d.%d" % (int(x.split('.')[0]), int(x.split('.')[1])))
 
 
-
-
-
-
-
 def btn2crsr():
     print(txt_edit.index(tk.INSERT))
-    txt_edit.mark_set("insert", "%d.%d" % (1,2))
+    txt_edit.mark_set("insert", "%d.%d" % (1, 2))
 
 
 def btn3sndbtn():
@@ -80,21 +77,32 @@ def btn3sndbtn():
     txt_msg = txt_edit.get(1.0, "end-1c")
     cm.BroadCast(txt_msg)
 
+# buffEnable = 0
+# def senderBuffHandler():
+#     while 1:
+#         if buffEnable:
+#
+#         pass
+
 def btn4cnct():
     # cm.Connect()
     Thread(target=changeOccured).start()
+    # Thread(target=senderBuffHandler).start()
 
 
 def btn5dscnct():
     mg = 0
 
+
 counter = 0;
+
 
 def btn6edted(e):
     global counter
     counter += 1
     print(counter)
     btn3sndbtn()
+
 
 def btn7addchar():
     # get position l cursor
@@ -117,6 +125,7 @@ def btn7addchar():
     # print(n.charPosCharr)
     n.printList()
 
+
 def btn8addmrk():
     txt_edit.tag_add('c', 1.2, 1.3)
     txt_edit.tag_configure('c', background='red')
@@ -127,9 +136,12 @@ def btn9addmrk():
     txt_edit.tag_add('c', txt_edit.index(tk.INSERT))
     txt_edit.tag_configure('c', background='red')
 
+
 arr = []
 prob = 0
 seq_ind = 0
+
+
 def btn10edted(e):
     global arr
     global prob
@@ -141,7 +153,7 @@ def btn10edted(e):
     arr.append(txt_edit.index(tk.INSERT))
     print(arr)
     # UNDERLINE! lw prob = 1
-    if len(arr)>1:
+    if len(arr) > 1:
         if (int(arr[-1].split('.')[1]) - int(arr[-2].split('.')[1])) != 1:
             print(int(arr[-2].split('.')[1]))
             print(int(arr[-1].split('.')[1]))
@@ -154,14 +166,11 @@ def btn10edted(e):
     if prob == 1:
         addUnderline(seq_ind)
 
-
-
-            #23mlha marra w7da
-            #disable lw new line
-            #mayb blink l button
-            #another thing what id 3ml new line w kammel?
-            #lw 3ml new line. disable w 2ollo updating wait w h3mlha mn nfsy ana
-
+        # 23mlha marra w7da
+        # disable lw new line
+        # mayb blink l button
+        # another thing what id 3ml new line w kammel?
+        # lw 3ml new line. disable w 2ollo updating wait w h3mlha mn nfsy ana
 
 
 def btn10chckmod():
@@ -171,6 +180,7 @@ def btn10chckmod():
         btn7addchar()
         save_file()
     # txt_edit.configure(state="normal")
+
 
 def btn11fixprob():
     global seq_ind
@@ -185,6 +195,7 @@ def btn11fixprob():
         # call function t update l sequence
         removeUnderline()
 
+
 def addUnderline(ind):
     txt_edit.tag_delete('notUpdatedInDict')
     txt_edit.tag_add('notUpdatedInDict', ind, 'end')
@@ -194,7 +205,9 @@ def addUnderline(ind):
 def removeUnderline():
     txt_edit.tag_delete('notUpdatedInDict')
 
+
 start_writing = 0
+
 
 def btn12strtwrtng():
     global start_writing
@@ -202,19 +215,87 @@ def btn12strtwrtng():
     # mayb check consistency first as well
     # print(old_insert)
 
+
 def btn13stpwrtng():
     global start_writing
     start_writing = 0
 
+
 mnUserTany = 0
 charId = '400'
+
+
+class Application(tk.Frame):
+
+    def __init__(self, master):
+        self.master = master
+        tk.Frame.__init__(self)
+        self.chngeBuffer = list()
+        self.localBuffer = list()
+
+        self._after_id = None
+
+        self.counter = 0
+        self.end = 0
+
+    def handle_wait(self):
+        # cancel the old job
+        if self._after_id is not None:
+            self.after_cancel(self._after_id)
+
+        # create a new job
+        self._after_id = self.after(1000, self.send_change)
+
+    def sendNow(self, i):
+        print(i)
+        print(self.localBuffer[i:i + 4])
+        # i = self.counter
+        # if self.counter < len(self.localBuffer):
+        #     print("LOOOOK", self.localBuffer[i:i + 4])
+        # how h len = 9
+        # 0:4
+        # 4:8
+        # 8:12
+        # 0 4
+        if (len(self.localBuffer) - i) >= 4:
+            cm.BroadCast(self.localBuffer[i:i + 4])
+        else:
+            cm.BroadCast(self.localBuffer[i:len(self.localBuffer)])
+        #     self.counter += 4
+        # else:
+        #     self.counter = 0
+
+    def send_change(self):
+        # global buffEnable
+        # buffEnable = 1
+        # for i in range(len(self.chngeBuffer)):
+            # cm.BroadCast(json.dumps(self.chngeBuffer[i]))
+        # 0 1 2 3 4
+        if len(self.chngeBuffer) > 4:
+            i = 0
+            j = 0
+            self.localBuffer = self.chngeBuffer.copy()
+            while i < len(self.localBuffer):
+                # self.after(j, self.sendNow)
+                self.after(j, lambda x=i: self.sendNow(x))
+                i += 4
+                j += 700
+            self.end = i - 4
+        else:
+            cm.BroadCast(self.chngeBuffer)
+                # time.sleep(0.6)
+        self.chngeBuffer.clear()
+
+
+
 
 def btnaddchar(indx1, indx2):
     global lastRcvdChnge
     global mnUserTany
     global charId
+
     # get position l cursor
-    #print(txt_edit.index(tk.INSERT))
+    # print(txt_edit.index(tk.INSERT))
     x = indx1
 
     posx = int(x.split('.')[0])
@@ -234,14 +315,15 @@ def btnaddchar(indx1, indx2):
         newChange = n.add_char_here(elem, posx, posy)
         newChange['lastRcvdChnge'] = str(lastRcvdChnge)
         print(newChange)
-        cm.BroadCast(json.dumps(newChange))
+        app.chngeBuffer.append(json.dumps(newChange))
+        app.handle_wait()
+        # cm.BroadCast(json.dumps(newChange))
     print(n.charIdPos)
     n.printList()
 
 
-
 def on_insert(*args):
-    print ("INS:", txt_edit.index(args[0]))
+    print("INS:", txt_edit.index(args[0]))
     indx1 = txt_edit.index(args[0])
     old_insert(*args)
     print(txt_edit.index(args[0]))
@@ -253,6 +335,7 @@ def btndelchar(indx):
     global mnUserTany
     global charId
     global lastRcvdChnge
+
     # get position l cursor
     # print(txt_edit.index(tk.INSERT))
     x = indx
@@ -275,14 +358,15 @@ def btndelchar(indx):
         newChange = n.del_char_here(posx, posy)
         newChange['lastRcvdChnge'] = str(lastRcvdChnge)
         print(newChange)
-        cm.BroadCast(json.dumps(newChange))
+        app.chngeBuffer.append(json.dumps(newChange))
+        app.handle_wait()
+        # cm.BroadCast(json.dumps(newChange))
     print(n.charIdPos)
     n.printList()
 
 
-
 def on_delete(*args):
-    print ("DEL:", list(map(txt_edit.index, args)))
+    print("DEL:", list(map(txt_edit.index, args)))
     indx = list(map(txt_edit.index, args))
     old_delete(*args)
     print("hi, ", indx[0])
@@ -299,46 +383,49 @@ def btn13anthr():
 def insertThere(pos, elem):
     txt_edit.insert(pos, elem)
 
+
 def deleteThere(pos):
     txt_edit.delete(pos)
+
 
 def deleteThereTest():
     txt_edit.delete('1.2')
 
+
 def changeOccured():
     global lastRcvdChnge
     while 1:
-        chnge = cm.ws.recv()
-        print(chnge)
-        chnge=json.loads(chnge)
-        #if 
-        if (chnge["delta"] is not None):#and (chnge["freeze"] !="false"):
-            chnge=json.loads(chnge["delta"] )
-            # if chnge.has_key("operation"):
-            if "operation" in chnge:
-            #if chnge["operation"] == "ins" or chnge["operation"] == "del":
-                receiveChange(chnge["operation"], 
-                            chnge["elem"],
-                            chnge["parent_id"] if chnge["parent_id"] == 'None' else float(chnge["parent_id"]),
-                            chnge["child_id"] if chnge["child_id"] == 'None' else float(chnge["child_id"]),
-                            float(chnge["my_id"]))
-                lastRcvdChnge = chnge["change_id"]
-                
-        # if chnge is not None:
-        #     print(chnge)
-        #     if len(chnge.split('&')) == 5:
-        #         receiveChange(chnge.split('&')[0],
-        #                       chnge.split('&')[1],
-        #                       chnge.split('&')[2] if chnge.split('&')[2] == 'None' else float(chnge.split('&')[2]),
-        #                       chnge.split('&')[3] if chnge.split('&')[3] == 'None' else float(chnge.split('&')[3]),
-        #                       float(chnge.split('&')[4]))
-        # "operation":"ins",
-        #         "elem":str(elem),
-        #         "parent_id":str(parent_id),
-        #         "child_id":str(newline_child),
-        #         "my_id":str(my_id),
-        #         "change_id":str(change_id),
-        #         "lastRcvdChnge": " "
+        change = cm.ws.recv()
+        print(change)
+        change = json.loads(change)
+        if "delta" in change:  # and (chnge["freeze"] !="false"):
+            change = change["delta"]
+            if isinstance(change, list):
+                print("entered heeeeeeeeeere22")
+                for chnge in change:
+                    chnge = json.loads(chnge)
+                    if "operation" in chnge:
+                        # if chnge["operation"] == "ins" or chnge["operation"] == "del":
+                        receiveChange(chnge["operation"],
+                                      chnge["elem"],
+                                      chnge["parent_id"] if chnge["parent_id"] == 'None' else float(chnge["parent_id"]),
+                                      chnge["child_id"] if chnge["child_id"] == 'None' else float(chnge["child_id"]),
+                                      float(chnge["my_id"]))
+                        lastRcvdChnge = chnge["change_id"]
+            else:
+                print("entered heeeeeeeeeere")
+                # if "delta" in change:  # and (chnge["freeze"] !="false"):
+                #     # change = json.loads(change["delta"])
+                #     change = change["delta"]
+                #     # if chnge.has_key("operation"):
+                #     if "operation" in change:
+                #         # if chnge["operation"] == "ins" or chnge["operation"] == "del":
+                #         receiveChange(change["operation"],
+                #                       change["elem"],
+                #                       change["parent_id"] if change["parent_id"] == 'None' else float(change["parent_id"]),
+                #                       change["child_id"] if change["child_id"] == 'None' else float(change["child_id"]),
+                #                       float(change["my_id"]))
+                #         lastRcvdChnge = change["change_id"]
 
 
 def receiveChange(op, elem, parent_id, child_id, id):
@@ -347,12 +434,12 @@ def receiveChange(op, elem, parent_id, child_id, id):
     charId = id
     mnUserTany = 1
 
-    if op == "ins": # add not delete
+    if op == "ins":  # add not delete
         if child_id == 'None':
             if parent_id == 'None':
                 # insertThere('1.0', elem)
                 # insertThere(str('1')+'.'+str('0'), elem) # 25ALLY DI 1,0 34AN MSH HA HANDLEHA FL DELETE
-                insertThere(str(len(n.charPosCharr)-1)+'.'+str('0'), elem)
+                insertThere(str(len(n.charPosCharr) - 1) + '.' + str('0'), elem)
             else:
                 parent_pos = n.charIdPos[parent_id]
                 # parentposx = int(parent_pos.split('.')[0])
@@ -372,8 +459,6 @@ def receiveChange(op, elem, parent_id, child_id, id):
         deleteThere(pos)
 
 
-
-
 # cm = ConnectionManager()
 cm = connection_manager()
 
@@ -384,7 +469,7 @@ window.title("Text Editor Application")
 window.rowconfigure(0, minsize=800, weight=1)
 window.columnconfigure(1, minsize=800, weight=1)
 
-txt_edit = tk.Text(window, wrap="word", bg = "light yellow")
+txt_edit = tk.Text(window, wrap="word", bg="light yellow")
 fr_buttons = tk.Frame(window, relief=tk.RAISED, bd=2)
 btn_open = tk.Button(fr_buttons, text="Open", command=open_file)
 btn_save = tk.Button(fr_buttons, text="Save As...", command=save_file)
@@ -402,7 +487,6 @@ btn_12 = tk.Button(fr_buttons, text="Start writing", command=btn12strtwrtng)
 btn_13 = tk.Button(fr_buttons, text="USER TANY 7T H", command=btn13anthr)
 btn_14 = tk.Button(fr_buttons, text="delete pos 1.2", command=deleteThereTest)
 
-
 btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 btn_save.grid(row=1, column=0, sticky="ew", padx=5)
 btn_1.grid(row=2, column=0, sticky="ew", padx=5)
@@ -419,20 +503,19 @@ btn_12.grid(row=12, column=0, sticky="ew", padx=5)
 btn_13.grid(row=13, column=0, sticky="ew", padx=5)
 btn_14.grid(row=14, column=0, sticky="ew", padx=5)
 
-#lw l text deleted cursor position????
+# lw l text deleted cursor position????
 
 fr_buttons.grid(row=0, column=0, sticky="ns")
 txt_edit.grid(row=0, column=1, sticky="nsew")
 
-
 redir = WidgetRedirector(txt_edit)
-old_insert=redir.register("insert", on_insert)
-old_delete=redir.register("delete", on_delete)
-
+old_insert = redir.register("insert", on_insert)
+old_delete = redir.register("delete", on_delete)
 
 # NOT NOW DONT BIND
 # txt_edit.bind("<KeyRelease>", btn6edted)
 
 # txt_edit.bind("<KeyRelease>", btn10edted)
 
-window.mainloop()
+app = Application(window)
+app.mainloop()

@@ -17,6 +17,8 @@ class connection_manager:
             ## process recieved data
             print(resp)
     def BroadCast(self,msg):
+        print("going to broadcast this msg")
+        print(msg)
         self.ws.send(json.dumps({"action":"updateAll","data":msg}))
     def setname(self,name):
         self.ws.send(json.dumps({"action":"setName","name":name}))
