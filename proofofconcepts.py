@@ -1,12 +1,17 @@
 from concurrent.futures import thread
 import threading
+import json
 from AWSLambdaConnectionManager import connection_manager
 
 cm=connection_manager()
 def reciever():
     while True:
         resp=cm.ws.recv()
-        print(resp)
+        resp=json.loads(resp)
+        try:
+            print(resp["yourID"])
+        except:
+            print(resp)
 mythr=threading.Thread(target=reciever)
 
 mythr.start()
@@ -14,4 +19,7 @@ mythr.start()
 
 
 cm.BroadCast("alo")
-cm.GetDocument()
+cm.GetID()
+
+cm.GetID()
+#cm.GetDocument()

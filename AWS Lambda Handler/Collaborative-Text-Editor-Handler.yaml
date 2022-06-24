@@ -23,29 +23,34 @@ Resources:
           Type: Api
           Properties:
             Path: /MyResource
-            Method: $default
+            Method: getID
         Api3:
           Type: Api
           Properties:
             Path: /MyResource
-            Method: $connect
+            Method: $default
         Api4:
           Type: Api
           Properties:
             Path: /MyResource
-            Method: updateAll
+            Method: $connect
         Api5:
           Type: Api
           Properties:
             Path: /MyResource
-            Method: setName
+            Method: setPosition
         Api6:
           Type: Api
           Properties:
             Path: /MyResource
-            Method: GetDocument
+            Method: updateAll
         Api7:
           Type: Api
           Properties:
             Path: /MyResource
-            Method: setPosition
+            Method: setName
+        Api8:
+          Type: Api
+          Properties:
+            Path: /MyResource
+            Method: GetDocument

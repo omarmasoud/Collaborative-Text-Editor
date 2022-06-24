@@ -156,6 +156,15 @@ def lambda_handler(event, context):
         #sendto(NamesDict[recepientname],msgdata)
         
     ## on new user connecting
+    elif routeKey =='getID':
+        print("getting id {}".format(connectionId))
+        sendMsgToConnection(connectionId,
+            {
+                "yourID":str(connectionId)
+            }
+            )
+        
+        
     elif routeKey =='$connect':
         print('somebody connected wow')
         connections.append(connectionId)
@@ -165,14 +174,18 @@ def lambda_handler(event, context):
         notifymsg='{} has joined the session'.format(connectionId)
         print(notifymsg)
         print('event is  ')
-        print(event)
+        # print(event)
+        # sendMsgToConnection(connectionId,json.dumps(
+        #     {
+        #         "yourID":str(connectionId)
+        #     }
+        #     ))
         #broadcast(json.dumps(notifymsg))
     ##Custom Set Name for a connection
     elif routeKey =='setName':
         print('new name entered')
         body=event['body']
         body=body.replace("'", "\"")
-       
         body=json.loads(body)
         NamesDict[connectionId][0]=body['name']
         #broadcast("{} has joined say hello".format(body['name']))
@@ -189,8 +202,17 @@ def lambda_handler(event, context):
         
         dblistentries=db_connection_manager.scan_db()
         #print(dblistentries[1]["charid"])
-        sendMsgToConnection(connectionId,dblistentries)
-        print("document sent to connection {}".format(NamesDict[connectionId]))
+        
+        
+        sendMsgToConnection(connectionId,json.dumps(
+            {
+                "yourID":str(connectionId)
+            }
+            ))
+        
+        
+        # sendMsgToConnection(connectionId,dblistentries)
+        # print("document sent to connection {}".format(NamesDict[connectionId]))
         
     elif routeKey =='$disconnect':
         
@@ -234,8 +256,9 @@ def broadcast(Data,sender):
     #currconn=event['requestContext']['connectionId']
     msgtobesent={
     "freeze": "false",
+    "senderID":str(sender),
     "delta":Data,
-    "numusers":len(connections),
+    "numusers":str(len(connections)),
     "Userslocations" : json.dumps(list(NamesDict.values()))
     }
     for currentConnection in connections:
