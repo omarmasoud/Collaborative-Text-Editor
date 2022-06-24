@@ -25,6 +25,7 @@ client=boto3.client('apigatewaymanagementapi',endpoint_url=apigatewayUrl)
 connections=list()
 currconection=None# placeholder for new connection
 NamesDict={}
+clientsTexts={}
 serverLastRecievedChangeTimeStamp=0
 
 
@@ -136,6 +137,7 @@ def lambda_handler(event, context):
         body=event['body']
         body=body.replace("'", "\"")
         body=json.loads(body)
+        
         #recepientname=body['receiver']
         #print('recepient of name {} has id {}'.format(recepientname,NamesDict[recepientname]))
         
@@ -167,7 +169,11 @@ def lambda_handler(event, context):
     
     elif routeKey =='$connect':
         print('somebody connected wow')
+        
         connections.append(connectionId)
+        # if(len(connections)>1):
+        #     sendMsgToConnection(connections[0],{"sendDocument":"true"})
+            
         currconection=connectionId
         #Generate Random Name for new Connection,set initial cursor position at 0 
         NamesDict[connectionId]=[names.get_full_name(),0]
@@ -189,6 +195,18 @@ def lambda_handler(event, context):
         body=json.loads(body)
         NamesDict[connectionId][0]=body['name']
         #broadcast("{} has joined say hello".format(body['name']))
+        
+        
+    elif routeKey =='getText':
+        body=event['body']
+        body=body.replace("'", "\"")
+        body=json.loads(body)
+        clientsTexts['text']=body['text']
+    elif routeKey =='getTextDict':
+        body=event['body']
+        body=body.replace("'", "\"")
+        body=json.loads(body)
+        clientsTexts['textdict']=body['textdict']
     elif routeKey =='setPosition':
         
         print('new name Position entered')
@@ -201,14 +219,14 @@ def lambda_handler(event, context):
         
         dblistentries=db_connection_manager.scan_db()
         #print(dblistentries[1]["charid"])
-        broadcast(Data=None,freezevalue="true")
+        broadcast("None",connectionId,freezevalue="true")
         for i in range(len(dblistentries)):
             if(len(dblistentries)>=10):
-                sendMsgToConnection({"entry":dblistentries[i:i+10]})
+                sendMsgToConnection(connectionId,{"entry":dblistentries[i:i+10]})
                 del dblistentries[i:i+10]
                 i+=10
             else:
-                sendMsgToConnection({"entry":dblistentries})
+                sendMsgToConnection(connectionId,{"entry":dblistentries})
                 dblistentries.clear()
                 break
                 
@@ -223,8 +241,10 @@ def lambda_handler(event, context):
         print('disconnecting now from connection {} '.format(connectionId))
         #print(event)
         currconn=event['requestContext']['connectionId']
+        
+        ##debugging message
         if currconn in connections:
-            print('connection was already there at {}'.format(connections.index(currconn)))
+            print('connection {} was already there at index {}'.format(currconn,connections.index(currconn)))
         else:
             print(currconn)
             print(connections)
@@ -234,6 +254,10 @@ def lambda_handler(event, context):
             connections.remove(currconn)
         except:
             print('no name for connection {}'.format(currconn))
+        try:
+            clientsTexts.pop(currconn)
+        except:
+            print("connection of id {} had no client text entry in the dictionar".format(currconn))
 
     # TODO implement
     return {
