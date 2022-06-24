@@ -86,6 +86,7 @@ def btn3sndbtn():
 
 def btn4cnct():
     # cm.Connect()
+    print("connected")
     Thread(target=changeOccured).start()
     # Thread(target=senderBuffHandler).start()
 
@@ -451,19 +452,48 @@ def deleteThereTest():
     txt_edit.delete('1.2')
 
 
+lastChngeRcvdFromThisUsr = {}
+
 def changeOccured():
+    global lastChngeRcvdFromThisUsr
     global lastRcvdChnge
     while 1:
         change = cm.ws.recv()
         print(change)
         change = json.loads(change)
         if "delta" in change:  # and (chnge["freeze"] !="false"):
+            senderIDD = "-1"
+            if "senderID" in change:
+                senderIDD = change["senderID"]
+                print("LOOOK SENDER ID", senderIDD)
+                if senderIDD in lastChngeRcvdFromThisUsr:
+                    pass
+                else:
+                    lastChngeRcvdFromThisUsr[senderIDD] = "-1"
             change = change["delta"]
+            if change == "sendText":
+                print("GAAAAAAAAAAALYYYYYYYYYYYYYYYYYY SEEEEEEEEEEEEEEENNNNNDDDDDDDD TEEEEEEEEEXXXXXXXXXXTTTTTTTT")
+                pass
+            if change == "getDocument":
+                pass
+            if change == "None":
+                pass
             if isinstance(change, list):
                 print("entered heeeeeeeeeere22")
+
+                if str(lastChngeRcvdFromThisUsr[senderIDD]).rstrip().lstrip() != str(json.loads(change[-1])["lastBrdcstChnge"]).rstrip().lstrip():
+                    print(lastChngeRcvdFromThisUsr[senderIDD], " ", json.loads(change[-1])["lastBrdcstChnge"])
+                    print("ERRRORRRRRORRRRORRRR FI 7AGA MGTSH FL NOSSSS*****************")
+                else:
+                    print("MFIIIIIIIISHHHHH LOSSS")
+                lastChngeRcvdFromThisUsr[senderIDD] = json.loads(change[-1])["change_id"]
+                print("LAST RCVD DICT: ", lastChngeRcvdFromThisUsr)
+
                 for chnge in change:
                     chnge = json.loads(chnge)
+
                     if "operation" in chnge:
+
                         # if chnge["operation"] == "ins" or chnge["operation"] == "del":
                         receiveChange(chnge["operation"],
                                       chnge["elem"],
@@ -473,18 +503,7 @@ def changeOccured():
                         lastRcvdChnge = chnge["change_id"]
             else:
                 print("entered heeeeeeeeeere")
-                # if "delta" in change:  # and (chnge["freeze"] !="false"):
-                #     # change = json.loads(change["delta"])
-                #     change = change["delta"]
-                #     # if chnge.has_key("operation"):
-                #     if "operation" in change:
-                #         # if chnge["operation"] == "ins" or chnge["operation"] == "del":
-                #         receiveChange(change["operation"],
-                #                       change["elem"],
-                #                       change["parent_id"] if change["parent_id"] == 'None' else float(change["parent_id"]),
-                #                       change["child_id"] if change["child_id"] == 'None' else float(change["child_id"]),
-                #                       float(change["my_id"]))
-                #         lastRcvdChnge = change["change_id"]
+
 
 
 def receiveChange(op, elem, parent_id, child_id, id):
@@ -528,16 +547,6 @@ def brdcstDct():
         brdcstDct[i] = n.charPosCharr[i].copy()
         for j in range(0, len(brdcstDct[i])):
             if brdcstDct[i][j] is not None:
-                # elem = str(n.charPosCharr[i][j].elem)
-                # my_id = str(n.charPosCharr[i][j].my_id)
-                # parent_id = str(n.charPosCharr[i][j].parent_id)
-                # child_id = str(n.charPosCharr[i][j].child_id)
-                # brdcstDct[i][j] = {
-                #     "elem": elem,
-                #     "my_id": my_id,
-                #     "parent_id": parent_id,
-                #     "child_id": child_id
-                # }
                 brdcstDct[i][j] = {
                                 "elem": str(n.charPosCharr[i][j].elem),
                                 "my_id": str(n.charPosCharr[i][j].my_id),
