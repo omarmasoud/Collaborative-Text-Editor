@@ -421,7 +421,7 @@ def btndelchar(indx):
         app.handle_wait()
         # cm.BroadCast(json.dumps(newChange))
     # print(n.charIdPos) RAGGA3
-    # n.printList() RAGGA3
+    # n.printList()
 
 
 def on_delete(*args):
@@ -518,6 +518,39 @@ def receiveChange(op, elem, parent_id, child_id, id):
         deleteThere(pos)
 
 
+def brdcstDct():
+    brdcstDct = n.charPosCharr.copy()
+    n.printList()
+
+    for i in range(1, len(brdcstDct)):
+        #WALLA 23ML COPY KDA KDA????
+        # if len(n.charPosCharr[i]) > 0:
+        brdcstDct[i] = n.charPosCharr[i].copy()
+        for j in range(0, len(brdcstDct[i])):
+            if brdcstDct[i][j] is not None:
+                # elem = str(n.charPosCharr[i][j].elem)
+                # my_id = str(n.charPosCharr[i][j].my_id)
+                # parent_id = str(n.charPosCharr[i][j].parent_id)
+                # child_id = str(n.charPosCharr[i][j].child_id)
+                # brdcstDct[i][j] = {
+                #     "elem": elem,
+                #     "my_id": my_id,
+                #     "parent_id": parent_id,
+                #     "child_id": child_id
+                # }
+                brdcstDct[i][j] = {
+                                "elem": str(n.charPosCharr[i][j].elem),
+                                "my_id": str(n.charPosCharr[i][j].my_id),
+                                "parent_id": str(n.charPosCharr[i][j].parent_id),
+                                "child_id": str(n.charPosCharr[i][j].child_id)
+                            }
+    print(brdcstDct)
+    cm.BroadCast(brdcstDct)
+    n.printList()
+    # print(n.charPosCharr[1][2]['parent_id'])
+
+
+
 # cm = ConnectionManager()
 cm = connection_manager()
 
@@ -545,6 +578,7 @@ btn_11 = tk.Button(fr_buttons, text="Consistency Prob?", command=btn11fixprob)
 btn_12 = tk.Button(fr_buttons, text="Start writing", command=btn12strtwrtng)
 btn_13 = tk.Button(fr_buttons, text="USER TANY 7T H", command=btn13anthr)
 btn_14 = tk.Button(fr_buttons, text="delete pos 1.2", command=deleteThereTest)
+btn_15 = tk.Button(fr_buttons, text="broadcast dict", command=brdcstDct)
 
 btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 btn_save.grid(row=1, column=0, sticky="ew", padx=5)
@@ -561,6 +595,7 @@ btn_11.grid(row=11, column=0, sticky="ew", padx=5)
 btn_12.grid(row=12, column=0, sticky="ew", padx=5)
 btn_13.grid(row=13, column=0, sticky="ew", padx=5)
 btn_14.grid(row=14, column=0, sticky="ew", padx=5)
+btn_15.grid(row=15, column=0, sticky="ew", padx=5)
 
 # lw l text deleted cursor position????
 

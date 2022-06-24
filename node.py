@@ -22,7 +22,8 @@ class Node:
         return self.child_id
 
     def __str__(self):
-        return str(self.__class__) + ": " + str(self.__dict__)
+        return str(self.__dict__)
+        # return str(self.__class__) + ": " + str(self.__dict__)
 
 
 class TextSeq:
