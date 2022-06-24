@@ -22,4 +22,4 @@ cm.BroadCast("alo")
 cm.GetID()
 
 cm.GetID()
-#cm.GetDocument()
+cm.GetDocument()

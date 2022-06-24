@@ -164,7 +164,7 @@ def lambda_handler(event, context):
             }
             )
         
-        
+    
     elif routeKey =='$connect':
         print('somebody connected wow')
         connections.append(connectionId)
@@ -191,7 +191,6 @@ def lambda_handler(event, context):
         #broadcast("{} has joined say hello".format(body['name']))
     elif routeKey =='setPosition':
         
-        
         print('new name Position entered')
         body=event['body']
         body=body.replace("'", "\"")
@@ -202,13 +201,18 @@ def lambda_handler(event, context):
         
         dblistentries=db_connection_manager.scan_db()
         #print(dblistentries[1]["charid"])
+        broadcast(Data=None,freezevalue="true")
+        for i in range(len(dblistentries)):
+            if(len(dblistentries)>=10):
+                sendMsgToConnection({"entry":dblistentries[i:i+10]})
+                del dblistentries[i:i+10]
+                i+=10
+            else:
+                sendMsgToConnection({"entry":dblistentries})
+                dblistentries.clear()
+                break
+                
         
-        
-        sendMsgToConnection(connectionId,json.dumps(
-            {
-                "yourID":str(connectionId)
-            }
-            ))
         
         
         # sendMsgToConnection(connectionId,dblistentries)
@@ -252,10 +256,10 @@ def sendMsgToConnection(uniqueConnection,Data):
     client.post_to_connection(ConnectionId=str(uniqueConnection),Data=json.dumps(Data).encode('utf-8'))
     
     
-def broadcast(Data,sender):
+def broadcast(Data,sender,freezevalue="false"):
     #currconn=event['requestContext']['connectionId']
     msgtobesent={
-    "freeze": "false",
+    "freeze": freezevalue,
     "senderID":str(sender),
     "delta":Data,
     "numusers":str(len(connections)),
