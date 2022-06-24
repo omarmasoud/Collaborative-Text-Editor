@@ -142,17 +142,17 @@ def lambda_handler(event, context):
         #retrieving body data as msg to be broadcasted (document change)
         msgdata=body['data']
         #client.post_to_connection(ConnectionId=NamesDict[recepientname],Data=json.dumps(msgdata).encode('utf-8'))
-        
+        print("character data is {}".format(body['data']))
         #broadcasting change activity to all connections
         broadcast(msgdata,connectionId)
         
         #logging change activity into database
         db_connection_manager.insert_to_db({"charid":names.get_full_name(),"data":names.get_full_name(),"delta": msgdata})
         # trying to broadcast all datbase entries
-        dblistentries=db_connection_manager.scan_db()
-        print(dblistentries[1]["charid"])
+        #dblistentries=db_connection_manager.scan_db()
+        #print(dblistentries[1]["charid"])
         #temp=json.dumps({"entries":dblistentries})
-        broadcast(dblistentries,connectionId)
+        #broadcast(dblistentries,connectionId)
         #sendto(NamesDict[recepientname],msgdata)
         
     ## on new user connecting
@@ -177,14 +177,25 @@ def lambda_handler(event, context):
         NamesDict[connectionId][0]=body['name']
         #broadcast("{} has joined say hello".format(body['name']))
     elif routeKey =='setPosition':
+        
+        
         print('new name Position entered')
         body=event['body']
         body=body.replace("'", "\"")
         body=json.loads(body)
         NamesDict[connectionId][1]=body['position']
+        
+    elif routeKey=='GetDocument':
+        
+        dblistentries=db_connection_manager.scan_db()
+        #print(dblistentries[1]["charid"])
+        sendMsgToConnection(connectionId,dblistentries)
+        print("document sent to connection {}".format(NamesDict[connectionId]))
+        
     elif routeKey =='$disconnect':
-        print('disconnecting now')
-        print(event)
+        
+        print('disconnecting now from connection {} '.format(connectionId))
+        #print(event)
         currconn=event['requestContext']['connectionId']
         if currconn in connections:
             print('connection was already there at {}'.format(connections.index(currconn)))
@@ -214,6 +225,9 @@ def sendto(Name,Data):
     "Userslocations" :json.dumps(list(NamesDict.values()))
     }
     client.post_to_connection(ConnectionId=str(NamesDict[Name]),Data=json.dumps(msgtobesent).encode('utf-8'))
+
+def sendMsgToConnection(uniqueConnection,Data):
+    client.post_to_connection(ConnectionId=str(uniqueConnection),Data=json.dumps(Data).encode('utf-8'))
     
     
 def broadcast(Data,sender):
@@ -226,6 +240,9 @@ def broadcast(Data,sender):
     }
     for currentConnection in connections:
         if currentConnection != sender:
-            client.post_to_connection(ConnectionId=currentConnection,Data=json.dumps(msgtobesent).encode('utf-8'))
+            try:
+                client.post_to_connection(ConnectionId=currentConnection,Data=json.dumps(msgtobesent).encode('utf-8'))
+            except:
+                pass
             #sendto(connectionId=currentConnection,Data=Data)
             

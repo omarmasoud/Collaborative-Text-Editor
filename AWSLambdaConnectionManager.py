@@ -24,5 +24,7 @@ class connection_manager:
         self.ws.send(json.dumps({"action":"setName","name":name}))
     def setPosition(self,pos):
         self.ws.send(json.dumps({"action":"setPosition","position":pos}))
+    def GetDocument(self):
+        self.ws.send(json.dumps({"action":"GetDocument"}))
 
-cm=connection_manager()
+#cm=connection_manager()
