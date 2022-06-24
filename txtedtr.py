@@ -261,11 +261,11 @@ class Application(tk.Frame):
         # 8:12
         # 0 4
         if (len(self.localBuffer) - i) >= 4:
-            lastChnge = json.loads(self.chngeBuffer.pop(i+3))
+            lastChnge = json.loads(self.localBuffer.pop(i+3))
             lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(
                 list(self.chngesBroadcastByMe)) > 0 else -1
             # self.chngeBuffer.append(json.dumps(lastChnge))
-            self.chngeBuffer.insert(i+3, json.dumps(lastChnge))
+            self.localBuffer.insert(i+3, json.dumps(lastChnge))
 
             cm.BroadCast(self.localBuffer[i:i + 4])
             # 23MLHA REGISTER FL SENT
@@ -274,10 +274,10 @@ class Application(tk.Frame):
 
             self.chngesBroadcastByMe[json.loads(self.localBuffer[i + 3])["change_id"]] = self.localBuffer[i:i + 4]
         else:
-            lastChnge = json.loads(self.chngeBuffer.pop(len(self.localBuffer)-1))
+            lastChnge = json.loads(self.localBuffer.pop(len(self.localBuffer)-1))
             lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(
                 list(self.chngesBroadcastByMe)) > 0 else -1
-            self.chngeBuffer.append(json.dumps(lastChnge))
+            self.localBuffer.append(json.dumps(lastChnge))
 
             cm.BroadCast(self.localBuffer[i:len(self.localBuffer)])
             # 23MLHA REGISTER FL SENT
