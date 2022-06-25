@@ -15,12 +15,18 @@ import time
 
 from datetime import datetime
 
+
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
+import customconstants as CONSTANTS
+from tkinter.filedialog import asksaveasfile, askopenfile
+
 lastRcvdChnge = -1
 
 
 
 
-def open_file():
+def open_file2():
     """Open a file for editing."""
 
     txt_edit.delete(1.0, tk.END)
@@ -40,7 +46,7 @@ def open_file():
     txt_edit.edit_modified(0)
 
 
-def save_file():
+def save_file2():
     """Save the current file as a new file."""
     filepath = "D:/New folder (2)/dstrbtd text file/dst.txt"
     # filepath = asksaveasfilename(
@@ -469,6 +475,8 @@ def btndelchar(indx):
 
 
 def on_delete(*args):
+    if CONSTANTS.DELETE_SEMAPHORE == True:
+        return
     # print("DEL:", list(map(txt_edit.index, args)))
     indx = list(map(txt_edit.index, args))
     old_delete(*args)
@@ -696,56 +704,155 @@ def brdcstDct():
 
 
 
+def save_file():
+    files = [('Text Document', '*.txt')]
+    file = asksaveasfile(filetypes = files, defaultextension = files)
+    file.write(txt_edit.get("1.0", END))
+
+
+#msgtobesent={
+#    "freeze": freezevalue,
+#    "senderID":str(sender),
+#    "delta": Data,
+#    "numusers":str(len(connections)),
+#    "Userslocations" : json.dumps(list(NamesDict.values()))
+#    }
+
+
+def open_file():
+    global n
+    file = askopenfile(mode ='r', filetypes =[('Text Document', '*.txt')])
+    if file is not None:
+        content = file.read()
+        print(f'printing n1: {n.printList()}')
+        n = node.TextSeq()
+        print(f'printing n2: {n.printList()}')
+        CONSTANTS.DELETE_SEMAPHORE = True
+        txt_edit.delete("1.0", END)
+        CONSTANTS.DELETE_SEMAPHORE = False
+
+        pos_x = 1
+        pos_y = 0
+        cursor = f'{pos_x}.{pos_y}'
+
+        for charact in content:
+            print(f' current: {cursor} - char: {charact}')
+            txt_edit.insert(cursor, charact)
+            if pos_y > 86 or charact == '\n':
+                pos_y = 0
+                pos_x = pos_x + 1
+                continue
+            pos_y = pos_y + 1
+            cursor = f'{pos_x}.{pos_y}'
+            print(f' new cursor: {cursor}')
+
+    n.printList()
+
+
+
+def btn_insert():
+    pos_x = 0
+    pos_y = 0
+    while pos_x <= 250:
+        if pos_y > 86:
+            pos_y = 0
+            pos_x = pos_x + 1
+        cursor_index = f'{pos_x}.{pos_y}'
+        elem = txt_edit.get(cursor_index)
+
+        if len(elem) > 0:
+            n.add_char_here(elem, pos_x, pos_y)
+            if elem == '\n':
+                pos_y = 0
+                pos_x = pos_x + 1
+                continue
+        pos_y = pos_y + 1
+        cursor = cursor_index
+    n.printList()
+    convert_dict_to_text(n)
+
+
+def convert_dict_to_text(textseq):
+    global n
+    n = node.TextSeq()
+    n.printList()
+    CONSTANTS.INSERT_SEMPAHORE = True
+    for i in range(1, len(textseq.charPosCharr)):
+        for j in range(0, len(textseq.charPosCharr[i])):
+            txt_edit.insert(f'{i}.{j}', textseq.charPosCharr[i][j].get_elem())
+    CONSTANTS.INSERT_SEMPAHORE = False
+
 # cm = ConnectionManager()
 cm = connection_manager()
-print("3mlt connect")
-
+global n
 n = node.TextSeq()
 
-window = tk.Tk()
-window.title("Text Editor Application")
+window = ttk.Window(themename='darkly')
+
+# NOT NOW DONT BIND
+# txt_edit.bind("<KeyRelease>", btn6edted)
+
+# txt_edit.bind("<KeyRelease>", btn10edted)
+
+# ======================================================== [ GUI FUNCTION ] ========================================================
+
+
+BUTTON_SPACING = 5
+LABEL_SPACING = 10
+
+window.title("Collaborative Text Editor")
 window.rowconfigure(0, minsize=800, weight=1)
 window.columnconfigure(1, minsize=800, weight=1)
 
-txt_edit = tk.Text(window, wrap="word", bg="light yellow")
-fr_buttons = tk.Frame(window, relief=tk.RAISED, bd=2)
-btn_open = tk.Button(fr_buttons, text="Open", command=open_file)
-btn_save = tk.Button(fr_buttons, text="Save As...", command=save_file)
-btn_1 = tk.Button(fr_buttons, text="Duplicate", command=btndplcte)
-btn_2 = tk.Button(fr_buttons, text="Cursor", command=btn2crsr)
-btn_3 = tk.Button(fr_buttons, text="Send All", command=btn3sndbtn)
-btn_4 = tk.Button(fr_buttons, text="Connect", command=btn4cnct)
-btn_5 = tk.Button(fr_buttons, text="Disconnect", command=btn5dscnct)
-btn_7 = tk.Button(fr_buttons, text="Add This Char To Dict", command=btn7addchar)
-btn_8 = tk.Button(fr_buttons, text="Add Mark for Cursor", command=btn8addmrk)
-btn_9 = tk.Button(fr_buttons, text="Add Mark for Cursor2", command=btn9addmrk)
-btn_10 = tk.Button(fr_buttons, text="Modified?", command=btn10chckmod)
-btn_11 = tk.Button(fr_buttons, text="Consistency Prob?", command=btn11fixprob)
-btn_12 = tk.Button(fr_buttons, text="Start writing", command=btn12strtwrtng)
-btn_13 = tk.Button(fr_buttons, text="USER TANY 7T H", command=btn13anthr)
-btn_14 = tk.Button(fr_buttons, text="delete pos 1.2", command=deleteThereTest)
-btn_15 = tk.Button(fr_buttons, text="broadcast dict", command=brdcstDct)
-btn_16 = tk.Button(fr_buttons, text="receive", command=btnRcv)
 
-btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-btn_save.grid(row=1, column=0, sticky="ew", padx=5)
-btn_1.grid(row=2, column=0, sticky="ew", padx=5)
-btn_2.grid(row=3, column=0, sticky="ew", padx=5)
-btn_3.grid(row=4, column=0, sticky="ew", padx=5)
-btn_4.grid(row=5, column=0, sticky="ew", padx=5)
-btn_5.grid(row=6, column=0, sticky="ew", padx=5)
-btn_7.grid(row=7, column=0, sticky="ew", padx=5)
-btn_8.grid(row=8, column=0, sticky="ew", padx=5)
-btn_9.grid(row=9, column=0, sticky="ew", padx=5)
-btn_10.grid(row=10, column=0, sticky="ew", padx=5)
-btn_11.grid(row=11, column=0, sticky="ew", padx=5)
-btn_12.grid(row=12, column=0, sticky="ew", padx=5)
-btn_13.grid(row=13, column=0, sticky="ew", padx=5)
-btn_14.grid(row=14, column=0, sticky="ew", padx=5)
-btn_15.grid(row=15, column=0, sticky="ew", padx=5)
-btn_16.grid(row=15, column=0, sticky="ew", padx=5)
+# main text field
+txt_edit = ttk.Text(window, wrap="word", bd=3, font='sans-serif', insertwidth=3, highlightcolor='blue')
 
-# lw l text deleted cursor position????
+# frame holder for buttons
+fr_buttons = tk.Frame(window, relief=tk.RAISED)
+
+btn_open = ttk.Button(fr_buttons, bootstyle='warning', text="Open", command=open_file)
+btn_save = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Save As...", command=save_file)
+btn_duplicate = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Duplicate", command=btndplcte)
+#btn_my_cursor = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Cursor", command=btn2crsr)
+btn_send_all = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Send All", command=btn3sndbtn)
+btn_connect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Connect", command=btn4cnct)
+btn_disconnect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Disconnect", command=btn5dscnct)
+#btn_add_char = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add This Char To Dict", command=btn7addchar)
+btn_add_mark1 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor", command=btn8addmrk)
+btn_add_mark2 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor2", command=btn9addmrk)
+#btn_modified = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Modified?", command=btn10chckmod)
+#btn_consistency = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Consistency Prob?", command=btn11fixprob)
+#btn_start = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Start writing", command=btn12strtwrtng)
+#btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
+btn_insert = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Insert", command=btn_insert)
+btn_test_dict_conv = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Convert Dict", command=convert_dict_to_text)
+
+num_users_str = 'Number of users: xxx'
+num_users_text = tk.Label(fr_buttons, text = num_users_str, justify=tk.LEFT, font=('', 10))
+users_cursors_str = 'User 1: 1.0\nUser 2: 20.12\nUser 3: xxx.xx'
+users_cursors_text = tk.Label(fr_buttons, text = users_cursors_str, justify=tk.LEFT, font=('', 10))
+
+btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING + 5)
+btn_save.grid(row=1, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_duplicate.grid(row=2, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_my_cursor.grid(row=3, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_send_all.grid(row=4, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_connect.grid(row=5, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_disconnect.grid(row=6, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_add_char.grid(row=7, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_add_mark1.grid(row=8, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_add_mark2.grid(row=9, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_modified.grid(row=10, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_consistency.grid(row=11, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_start.grid(row=12, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_temp.grid(row=13, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_insert.grid(row=10, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+
+num_users_text.grid(row=11, column=0, stick='ew', ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+users_cursors_text.grid(row=12, column=0, stick='ew',ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+
+
 
 fr_buttons.grid(row=0, column=0, sticky="ns")
 txt_edit.grid(row=0, column=1, sticky="nsew")
@@ -754,10 +861,10 @@ redir = WidgetRedirector(txt_edit)
 old_insert = redir.register("insert", on_insert)
 old_delete = redir.register("delete", on_delete)
 
-# NOT NOW DONT BIND
-# txt_edit.bind("<KeyRelease>", btn6edted)
 
-# txt_edit.bind("<KeyRelease>", btn10edted)
+
+# ======================================================== [ END OF GUI ] ========================================================
+
 
 app = Application(window)
 app.mainloop()
