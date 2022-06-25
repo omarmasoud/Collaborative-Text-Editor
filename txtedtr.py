@@ -250,8 +250,8 @@ class Application(tk.Frame):
         self._after_id = self.after(1000, self.send_change)
 
     def sendNow(self, i):
-        print(i)
-        print(self.localBuffer[i:i + 4])
+        # print(i)
+        # print(self.localBuffer[i:i + 4])
 
         # i = self.counter
         # if self.counter < len(self.localBuffer):
@@ -271,7 +271,7 @@ class Application(tk.Frame):
             cm.BroadCast(self.localBuffer[i:i + 4])
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[i+3])["change_id"]
-            print(self.justSent)
+            # print(self.justSent)
 
             self.chngesBroadcastByMe[json.loads(self.localBuffer[i + 3])["change_id"]] = self.localBuffer[i:i + 4]
         else:
@@ -283,10 +283,10 @@ class Application(tk.Frame):
             cm.BroadCast(self.localBuffer[i:len(self.localBuffer)])
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
-            print(self.justSent)
+            # print(self.justSent)
 
             self.chngesBroadcastByMe[json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]] = self.localBuffer[i:len(self.localBuffer)]
-            print("DIIIICCCTTTT", self.chngesBroadcastByMe)
+            # print("DIIIICCCTTTT", self.chngesBroadcastByMe)
             # clear localBuffer now
         #     self.counter += 4
         # else:
@@ -302,7 +302,7 @@ class Application(tk.Frame):
                     # self.after(j, self.sendNow)
                     self.after(j, lambda x=i: self.sendNow(x))
                     i += 4
-                    j += 700
+                    j += 800
                 self.end = i - 4
             else:
                 #2bl l broadcast. h7ot l lastBrdcstChnge
@@ -315,11 +315,11 @@ class Application(tk.Frame):
                     self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
 
                     #23MLHA REGISTER FL SENT
-                    print(self.chngeBuffer)
-                    print(self.chngesBroadcastByMe)
+                    # print(self.chngeBuffer)
+                    # print(self.chngesBroadcastByMe)
             self.chngeBuffer.clear()
         else:
-            print("need to WAIT")
+            # print("need to WAIT")
             self.after(500, self.send_change)
 
         # if float(json.loads(self.localBuffer[-1])["change_id"]) > float(self.justSent):
@@ -375,7 +375,7 @@ def btnaddchar(indx1, indx2):
     else:
         newChange = n.add_char_here(elem, posx, posy)
         newChange['lastRcvdChnge'] = str(lastRcvdChnge)
-        print(newChange)
+        # print(newChange)
         app.chngeBuffer.append(json.dumps(newChange))
         app.handle_wait()
         # cm.BroadCast(json.dumps(newChange))
@@ -418,7 +418,7 @@ def btndelchar(indx):
     else:
         newChange = n.del_char_here(posx, posy)
         newChange['lastRcvdChnge'] = str(lastRcvdChnge)
-        print(newChange)
+        # print(newChange)
         app.chngeBuffer.append(json.dumps(newChange))
         app.handle_wait()
         # cm.BroadCast(json.dumps(newChange))
@@ -466,13 +466,13 @@ def changeOccured():
     global lastRcvdChnge
     while 1:
         change = cm.ws.recv()
-        print(change)
+        # print(change)
         change = json.loads(change)
         if "delta" in change:  # and (chnge["freeze"] !="false"):
             senderIDD = "-1"
             if "senderID" in change:
                 senderIDD = change["senderID"]
-                print("LOOOK SENDER ID", senderIDD)
+                # print("LOOOK SENDER ID", senderIDD)
                 if senderIDD in lastChngeRcvdFromThisUsr:
                     pass
                 else:
@@ -482,7 +482,7 @@ def changeOccured():
 
             change = change["delta"]
             if change == "sendText":
-                print("GAAAAAAAAAAALYYYYYYYYYYYYYYYYYY SEEEEEEEEEEEEEEENNNNNDDDDDDDD TEEEEEEEEEXXXXXXXXXXTTTTTTTT")
+                # print("GAAAAAAAAAAALYYYYYYYYYYYYYYYYYY SEEEEEEEEEEEEEEENNNNNDDDDDDDD TEEEEEEEEEXXXXXXXXXXTTTTTTTT")
                 pass
             if change == "getDocument":
                 pass
@@ -490,12 +490,12 @@ def changeOccured():
                 pass
             # maza lw b -1???????????????????????? hb3t kollo
             if isinstance(change, str) and change.split()[0] == "sendAgain":
-                print("REQUEST TO SEND AGAAAAIIIINNNN")
-                print(change)
-                print("sendAgain eh???? ", change.split()[1])
+                # print("REQUEST TO SEND AGAAAAIIIINNNN")
+                # print(change)
+                # print("sendAgain eh???? ", change.split()[1])
                 delay = 500
                 if change.split()[1].lstrip().rstrip() == "-1":
-                    print("d5lt hna?")
+                    # print("d5lt hna?")
                     for i in range(0, len(list(app.chngesBroadcastByMe))):
                         # for j in range(0, len(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])):
                         #     #app.chngeBuffer.append(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]][j]) # JSON DUMPSSSSSSS????????
@@ -504,27 +504,28 @@ def changeOccured():
                         #     #cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                         app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
                         delay+=800
-                        print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
+                        # print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                 else:
-                    print("tyb hna?")
+                    # print("tyb hna?")
                     indOfLastChangeUserRcvd = list(app.chngesBroadcastByMe).index(change.split()[1].lstrip().rstrip())
-                    print("last rcvd by that usr: ", indOfLastChangeUserRcvd)
+                    # print("last rcvd by that usr: ", indOfLastChangeUserRcvd)
                     for i in range(indOfLastChangeUserRcvd + 1, len(list(app.chngesBroadcastByMe))):
                         app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
                         delay+=800
-                        print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
+                        # print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                         # app.chngeBuffer.append(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]]) # JSON DUMPSSSSSSS????????
 
             if isinstance(change, list):
-                print("entered heeeeeeeeeere22")
+                # print("entered heeeeeeeeeere22")
                 # EL AWL IF str(json.loads(change[-1])["lastBrdcstChnge"] AW str(json.loads(change[-1])["CHANGE_ID"] IN LIST str(lastChngeRcvdFromThisUsr[senderIDD]
                 # THEN IGNORE ITS A CHANGE I IMPLEMENTED
                 if str(json.loads(change[-1])["change_id"]).rstrip().lstrip() in lastChngeRcvdFromThisUsr[senderIDD]: #mmkn 2a check lw less than 2a5r 7aga 3mltha
-                    print("3MLTHA 2BL KDA. IGNORE") # ignore l2enny 3mlto
+                    # print("3MLTHA 2BL KDA. IGNORE") # ignore l2enny 3mlto
+                    pass
                 else:
                     if str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip() != str(json.loads(change[-1])["lastBrdcstChnge"]).rstrip().lstrip():
-                        print(lastChngeRcvdFromThisUsr[senderIDD], " ", json.loads(change[-1])["lastBrdcstChnge"])
-                        print("ERRRORRRRRORRRRORRRR FI 7AGA MGTSH FL NOSSSS*****************")
+                        # print(lastChngeRcvdFromThisUsr[senderIDD], " ", json.loads(change[-1])["lastBrdcstChnge"])
+                        # print("ERRRORRRRRORRRRORRRR FI 7AGA MGTSH FL NOSSSS*****************")
                         # DONT CALL RECEIVE CHNGE
                         # EB3T MN AWL: MSG = str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
                         msg = "sendAgain " + str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
@@ -540,13 +541,13 @@ def changeOccured():
 
 
                     else:
-                        print("MFIIIIIIIISHHHHH LOSSS")
+                        # print("MFIIIIIIIISHHHHH LOSSS")
                         sentOnce = 0
                         # sendAgainSent[senderIDD] = 0
                         # sendAgainCtr[senderIDD] = 'reset'
                         # H3MML L CHANGE
                         lastChngeRcvdFromThisUsr[senderIDD].append(json.loads(change[-1])["change_id"])
-                        print("LAST RCVD DICT: ", lastChngeRcvdFromThisUsr)
+                        # print("LAST RCVD DICT: ", lastChngeRcvdFromThisUsr)
 
                         for chnge in change:
                             chnge = json.loads(chnge)
@@ -560,8 +561,7 @@ def changeOccured():
                                               chnge["child_id"] if chnge["child_id"] == 'None' else float(chnge["child_id"]),
                                               float(chnge["my_id"]))
                                 lastRcvdChnge = chnge["change_id"]
-            else:
-                print("entered heeeeeeeeeere")
+
 
 
 
