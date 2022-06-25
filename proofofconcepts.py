@@ -29,13 +29,43 @@ from AWSLambdaConnectionManager import connection_manager
 
 ####################################
 ## testing 
-i=1
-def sayhello():
-    while True:
-        global i
-        print("hello {}".format(i))
-        i+=1
-        time.sleep(2)
+# i=1
+# def sayhello():
+#     while True:
+#         global i
+#         print("hello {}".format(i))
+#         i+=1
+#         time.sleep(2)
 
-timethr=threading.Thread(target=sayhello)
-timethr.start()
+# timethr=threading.Thread(target=sayhello)
+# timethr.start()
+
+
+#### testing updates on dynamodb table
+import boto3
+import json
+dbagent= boto3.resource('dynamodb',region_name='eu-central-1')
+t1=dbagent.Table('Collaborative-Text-Editor-Documents')
+
+tcount=dbagent.tables.all()
+resp=t1.put_item(
+    
+    Item={"documentName":"firstDocument",
+    "currentVersion":"0",
+    "currentDocument":[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}],
+    "versions":[[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}],[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}],[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}]]
+    }
+       
+)
+res=t1.update_item(Key={"documentName":"firstDocument"},
+    UpdateExpression="SET versions = list_append(versions, :newversion)  , currentVersion = :ver , currentDocument = :doc ",
+    ExpressionAttributeValues={
+        ':newversion': [{"id":12131,"pid":42332,"cid":3233}],
+        ":ver":"323",
+        ":doc": [{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":4},{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}]
+    },
+    ReturnValues="UPDATED_NEW"
+
+)
+res=t1.get_item(Key={"documentName":"firstDocument"})
+print (res['Item']['currentVersion'])

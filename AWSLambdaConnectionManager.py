@@ -16,11 +16,11 @@ class connection_manager:
             ### todo
             ## process recieved data
             print(resp)
-    def BroadCast(self,msg,documentStruct):
+    def BroadCast(self,msg,documentStruct="None",documentname="firstDocument"):
 
         print("going to broadcast this msg")
         print(msg)
-        self.ws.send(json.dumps({"action":"updateAll","data":msg,"documentStruct":documentStruct}))
+        self.ws.send(json.dumps({"action":"updateAll","data":msg,"documentStruct":documentStruct,"docName":documentname}))
     
 
     def setname(self,name):

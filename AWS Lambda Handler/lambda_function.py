@@ -5,7 +5,8 @@ import os
 import sys
 import subprocess
 import random
-
+import threading
+import time
 # pip install custom package to /tmp/ and add to path
 subprocess.call('pip install names -t /tmp/ --no-cache-dir'.split(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -29,6 +30,37 @@ clientsTexts={}
 serverLastRecievedChangeTimeStamp=0
 
 
+def broadcast(Data,sender,freezevalue="false"):
+    #currconn=event['requestContext']['connectionId']
+    msgtobesent={
+    "freeze": freezevalue,
+    "senderID":str(sender),
+    "delta": Data,
+    "numusers":str(len(connections)),
+    "Userslocations" : json.dumps(list(NamesDict.values()))
+    }
+    for currentConnection in connections:
+        if currentConnection != sender:
+            try:
+                client.post_to_connection(ConnectionId=currentConnection,Data=json.dumps(msgtobesent).encode('utf-8'))
+            except:
+                pass
+            #sendto(connectionId=currentConnection,Data=Data)
+
+# def textComparatorHandler():
+#     while True:
+#         broadcast("sendText","0")#broadcast to all connections without excepting one
+#         print("printed send text")
+#         time.sleep(2)
+#         # for txtkey in clientsTexts:
+#         #     if clientsTexts[txtkey] != clientsTexts[txtkey]:
+#         #         broadcast("getDocument","0",freezevalue=true)#freezing all users
+#         #time.sleep(25)
+
+# textComparatorHandlerDaemon=threading.Thread(target=textComparatorHandler)
+# textComparatorHandlerDaemon.start()
+                
+
 #Custom json encoder to avoid json errors with Dynamodb Decimal types
 # class JSONEncoder(json.JSONEncoder):
 #     def default(self, obj):
@@ -42,7 +74,7 @@ class DbConnectionManager:
     def __init__(self):
         self.dbagent= boto3.resource('dynamodb',region_name='eu-central-1')#initializing dynamodb object
         try:
-            self.t1=self.dbagent.Table('Collaborative-Text-Editor-Data')#primary dynamodb table
+            self.t1=self.dbagent.Table('Collaborative-Text-Editor-Documents')#primary dynamodb table
         except:
             self.t1=None
             print("couldn't reference table 1")
@@ -53,7 +85,7 @@ class DbConnectionManager:
         except:
             self.t2=None
             print("couldn't reference table 2")
-        self.t2=self.dbagent.Table('collaborativedump')#eplica table to be changed when creating replica
+        #self.t2=self.dbagent.Table('collaborativedump')#replica table to be changed when creating replica
         self.table1down=False# value to be set when a table is down to replicate when it is up and running again
         self.table2down=False
         
@@ -87,18 +119,20 @@ class DbConnectionManager:
         pass
     def retreive_from_db(self,key):
         self.t1.get_item(Key=key)
+        item=None
         try:
-            self.t1.get_item(Key=key)
+            item=self.t1.get_item(Key=key)
             #self.t2.put_item(Item=item)#inserting to replica
             self.table1down=False
         except:
             self.table1down=True
         try:
-           # self.t2.get_item(Key=key)
+           #item= self.t2.get_item(Key=key)
             #self.t2.put_item(Item=item)#inserting to replica
             self.table2down=False
         except:
             self.table2down=True
+            return item['Item']
         
     def scan_db(self):
         
@@ -121,7 +155,36 @@ class DbConnectionManager:
         return list(scanlst['Items'])
         
         pass
-    
+    def update_db(self,documentname="firstDocument",newdocument,newversion):
+        try:
+            self.t1.update_item(
+                Key={"documentName":documentName},
+                    UpdateExpression="SET versions = list_append(versions, :newdocument)  , currentVersion = :version , currentDocument = :doc ",
+                    ExpressionAttributeValues={
+                    ':newdocument': newdocument,
+                    ":version":str(newversion),
+                    ":doc": newdocument
+                    },
+                    ReturnValues="UPDATED_NEW"
+                )
+        self.table1down=False
+        except:
+            self.table1down=True
+        try:
+            # self.t2.update_item(
+            #     Key={"documentName":documentName},
+            #         UpdateExpression="SET versions = list_append(versions, :newdocument)  , currentVersion = :version , currentDocument = :doc ",
+            #         ExpressionAttributeValues={
+            #         ':newdocument': newdocument,
+            #         ":version":str(newversion),
+            #         ":doc": newdocument
+            #         },
+            #         ReturnValues="UPDATED_NEW"
+            #     )
+        self.table2down=False
+        except:
+            self.table2down=True
+            
     
 db_connection_manager=DbConnectionManager()
 
@@ -143,10 +206,22 @@ def lambda_handler(event, context):
         
         #retrieving body data as msg to be broadcasted (document change)
         msgdata=body['data']
+        
+        newdocstruct=body['documentStruct']
+        
+        docname=body['docName']
+        #getting document entry from the database
+        doc=db_connection_manager.retreive_from_db(docname)
+        
+        docver=int(doc['currentVersion'])
+        ##adding new version to database and updating version for that document
+        db_connection_manager.update_db(documentName=docName,newdocument=newdocstruct,newversion=str(docver+1))
         #client.post_to_connection(ConnectionId=NamesDict[recepientname],Data=json.dumps(msgdata).encode('utf-8'))
         print("character data is {}".format(body['data']))
         #broadcasting change activity to all connections
         broadcast(msgdata,connectionId)
+        
+        
         
         #logging change activity into database
         db_connection_manager.insert_to_db({"charid":names.get_full_name(),"data":names.get_full_name(),"delta": msgdata})
@@ -178,8 +253,11 @@ def lambda_handler(event, context):
         #Generate Random Name for new Connection,set initial cursor position at 0 
         NamesDict[connectionId]=[names.get_full_name(),0]
         notifymsg='{} has joined the session'.format(connectionId)
+        #initial values on connect
+        clientsTexts['text']=" "
+        clientsTexts['textdict']=" "
         print(notifymsg)
-        print('event is  ')
+        #print('event is  ')
         # print(event)
         # sendMsgToConnection(connectionId,json.dumps(
         #     {
@@ -193,28 +271,37 @@ def lambda_handler(event, context):
         body=event['body']
         body=body.replace("'", "\"")
         body=json.loads(body)
+        ##setting name of a connection
         NamesDict[connectionId][0]=body['name']
         #broadcast("{} has joined say hello".format(body['name']))
         
-        
+    #get text api
     elif routeKey =='getText':
         body=event['body']
         body=body.replace("'", "\"")
         body=json.loads(body)
         clientsTexts['text']=body['text']
+        
+    #get text dictionary data structure api
     elif routeKey =='getTextDict':
         body=event['body']
         body=body.replace("'", "\"")
         body=json.loads(body)
         clientsTexts['textdict']=body['textdict']
+        
+        
+    #setting position of a user api
     elif routeKey =='setPosition':
         
         print('new name Position entered')
         body=event['body']
         body=body.replace("'", "\"")
         body=json.loads(body)
+        ##setting position of a connection
         NamesDict[connectionId][1]=body['position']
         
+        
+    ## api for getting the document  from database
     elif routeKey=='GetDocument':
         
         dblistentries=db_connection_manager.scan_db()
@@ -230,7 +317,7 @@ def lambda_handler(event, context):
                 dblistentries.clear()
                 break
                 
-        
+        broadcast("None",connectionId,freezevalue="false")
         
         
         # sendMsgToConnection(connectionId,dblistentries)
@@ -280,20 +367,6 @@ def sendMsgToConnection(uniqueConnection,Data):
     client.post_to_connection(ConnectionId=str(uniqueConnection),Data=json.dumps(Data).encode('utf-8'))
     
     
-def broadcast(Data,sender,freezevalue="false"):
-    #currconn=event['requestContext']['connectionId']
-    msgtobesent={
-    "freeze": freezevalue,
-    "senderID":str(sender),
-    "delta":Data,
-    "numusers":str(len(connections)),
-    "Userslocations" : json.dumps(list(NamesDict.values()))
-    }
-    for currentConnection in connections:
-        if currentConnection != sender:
-            try:
-                client.post_to_connection(ConnectionId=currentConnection,Data=json.dumps(msgtobesent).encode('utf-8'))
-            except:
-                pass
-            #sendto(connectionId=currentConnection,Data=Data)
-            
+
+
+        
