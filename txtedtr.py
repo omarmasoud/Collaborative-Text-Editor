@@ -236,6 +236,7 @@ class Application(tk.Frame):
         self.chngesBroadcastByMe = {} #JSONDUMPS lw l msg list b awl id aw 2a5r id which?
 
         self._after_id = None
+        self._after_id2 = None
 
         self.counter = 0
         self.end = 0
@@ -248,6 +249,14 @@ class Application(tk.Frame):
 
         # create a new job
         self._after_id = self.after(1000, self.send_change)
+
+    def handle_wait2(self):
+        # cancel the old job
+        if self._after_id2 is not None:
+            self.after_cancel(self._after_id2)
+
+        # create a new job
+        self._after_id2 = self.after(1000, self.send_change)
 
     def sendNow(self, i):
         # print(i)
@@ -269,6 +278,7 @@ class Application(tk.Frame):
             self.localBuffer.insert(i+3, json.dumps(lastChnge))
 
             cm.BroadCast(self.localBuffer[i:i + 4])
+            self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[i+3])["change_id"]
             # print(self.justSent)
@@ -281,6 +291,7 @@ class Application(tk.Frame):
             self.localBuffer.append(json.dumps(lastChnge))
 
             cm.BroadCast(self.localBuffer[i:len(self.localBuffer)])
+            self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
             # print(self.justSent)
@@ -319,8 +330,9 @@ class Application(tk.Frame):
                     # print(self.chngesBroadcastByMe)
             self.chngeBuffer.clear()
         else:
-            # print("need to WAIT")
-            self.after(500, self.send_change)
+            print("need to WAIT")
+            self.handle_wait()
+            # self.after(800, self.send_change) #h3mlha handlewait
 
         # if float(json.loads(self.localBuffer[-1])["change_id"]) > float(self.justSent):
         #     print("need to WAIT")
