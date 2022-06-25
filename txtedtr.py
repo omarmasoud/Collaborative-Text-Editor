@@ -457,10 +457,11 @@ lastChngeRcvdFromThisUsr = {}
 
 # sendAgainSent = {}
 # sendAgainCtr = {}
-
+sentOnce = 0
 def changeOccured():
     # global sendAgainSent
     # global sendAgainCtr
+    global sentOnce
     global lastChngeRcvdFromThisUsr
     global lastRcvdChnge
     while 1:
@@ -528,12 +529,19 @@ def changeOccured():
                         # EB3T MN AWL: MSG = str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
                         msg = "sendAgain " + str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
 
-                        app.after(500, lambda j=msg: cm.BroadCast(j))
+                        if sentOnce == 3:
+                            sentOnce = 0
+
+                        if sentOnce == 0:
+                            app.after(500, lambda j=msg: cm.BroadCast(j))
+                        else:
+                            sentOnce += 1
                         #sendAgainCtr[senderIDD] = 'done'
 
 
                     else:
                         print("MFIIIIIIIISHHHHH LOSSS")
+                        sentOnce = 0
                         # sendAgainSent[senderIDD] = 0
                         # sendAgainCtr[senderIDD] = 'reset'
                         # H3MML L CHANGE
