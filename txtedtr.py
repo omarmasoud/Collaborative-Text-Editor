@@ -487,6 +487,7 @@ def changeOccured():
                 print("REQUEST TO SEND AGAAAAIIIINNNN")
                 print(change)
                 print("sendAgain eh???? ", change.split()[1])
+                delay = 500
                 if change.split()[1].lstrip().rstrip() == "-1":
                     print("d5lt hna?")
                     for i in range(0, len(list(app.chngesBroadcastByMe))):
@@ -495,14 +496,16 @@ def changeOccured():
                         #     #print(app.chngeBuffer)
                         #
                         #     #cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
-                        app.after(500+i*100, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
+                        app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
+                        delay+=800
                         print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                 else:
                     print("tyb hna?")
                     indOfLastChangeUserRcvd = list(app.chngesBroadcastByMe).index(change.split()[1].lstrip().rstrip())
                     print("last rcvd by that usr: ", indOfLastChangeUserRcvd)
                     for i in range(indOfLastChangeUserRcvd + 1, len(list(app.chngesBroadcastByMe))):
-                        app.after(500 + i * 100, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
+                        app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
+                        delay+=800
                         print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                         # app.chngeBuffer.append(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]]) # JSON DUMPSSSSSSS????????
 
