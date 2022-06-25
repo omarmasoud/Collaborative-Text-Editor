@@ -495,7 +495,8 @@ def changeOccured():
     global lastRcvdChnge
     while 1:
         change = cm.ws.recv()
-        # print(change)
+
+        print(change)
         change = json.loads(change)
         if "delta" in change:  # and (chnge["freeze"] !="false"):
             senderIDD = "-1"

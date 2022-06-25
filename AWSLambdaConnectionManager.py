@@ -6,7 +6,7 @@ import json
 class connection_manager:
     def __init__(self):
         self.wsconnectionurl='wss://bp491r2577.execute-api.eu-central-1.amazonaws.com/production'
-        self.ws=websocket.create_connection(self.wsconnectionurl)
+        self.ws=websocket.create_connection(self.wsconnectionurl,timeout=200000)
         # self.receiverthread=threading.Thread(target=self.reciever_function)
         # self.receiverthread.start()
 
