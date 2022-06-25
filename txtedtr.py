@@ -455,12 +455,12 @@ def deleteThereTest():
 
 lastChngeRcvdFromThisUsr = {}
 
-sendAgainSent = {}
-sendAgainCtr = {}
+# sendAgainSent = {}
+# sendAgainCtr = {}
 
 def changeOccured():
-    global sendAgainSent
-    global sendAgainCtr
+    # global sendAgainSent
+    # global sendAgainCtr
     global lastChngeRcvdFromThisUsr
     global lastRcvdChnge
     while 1:
@@ -528,28 +528,14 @@ def changeOccured():
                         # EB3T MN AWL: MSG = str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
                         msg = "sendAgain " + str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
 
-                        if senderIDD in sendAgainSent:
-                            if sendAgainSent[senderIDD] == 3:
-                                sendAgainSent[senderIDD] = 0
-                                sendAgainCtr[senderIDD] = 'reset'
-                        else:
-                            sendAgainSent[senderIDD] = 0
-                            sendAgainCtr[senderIDD] = 'reset'
-
-                        if sendAgainCtr[senderIDD] == 'done':
-                            sendAgainSent[senderIDD] += 1
-                        else:
-                            app.after(500, lambda j=msg: cm.BroadCast(j))
-                            sendAgainSent[senderIDD] = 0
-                            sendAgainCtr[senderIDD] = 'done'
-                        #app.after(500, lambda j=msg: cm.BroadCast(j))
+                        app.after(500, lambda j=msg: cm.BroadCast(j))
                         #sendAgainCtr[senderIDD] = 'done'
 
 
                     else:
                         print("MFIIIIIIIISHHHHH LOSSS")
-                        sendAgainSent[senderIDD] = 0
-                        sendAgainCtr[senderIDD] = 'reset'
+                        # sendAgainSent[senderIDD] = 0
+                        # sendAgainCtr[senderIDD] = 'reset'
                         # H3MML L CHANGE
                         lastChngeRcvdFromThisUsr[senderIDD].append(json.loads(change[-1])["change_id"])
                         print("LAST RCVD DICT: ", lastChngeRcvdFromThisUsr)
