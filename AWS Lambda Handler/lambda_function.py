@@ -155,19 +155,19 @@ class DbConnectionManager:
         return list(scanlst['Items'])
         
         pass
-    def update_db(self,documentname="firstDocument",newdocument,newversion):
+    def update_db(self,newdocumentStruct,newversion,documentname="firstDocument"):
         try:
             self.t1.update_item(
-                Key={"documentName":documentName},
+                Key={"documentName":documentname},
                     UpdateExpression="SET versions = list_append(versions, :newdocument)  , currentVersion = :version , currentDocument = :doc ",
                     ExpressionAttributeValues={
-                    ':newdocument': newdocument,
+                    ':newdocument': newdocumentStruct,
                     ":version":str(newversion),
-                    ":doc": newdocument
+                    ":doc": newdocumentStruct
                     },
                     ReturnValues="UPDATED_NEW"
                 )
-        self.table1down=False
+            self.table1down=False
         except:
             self.table1down=True
         try:
@@ -181,7 +181,7 @@ class DbConnectionManager:
             #         },
             #         ReturnValues="UPDATED_NEW"
             #     )
-        self.table2down=False
+            self.table2down=False
         except:
             self.table2down=True
             
@@ -215,7 +215,7 @@ def lambda_handler(event, context):
         
         docver=int(doc['currentVersion'])
         ##adding new version to database and updating version for that document
-        db_connection_manager.update_db(documentName=docName,newdocument=newdocstruct,newversion=str(docver+1))
+        db_connection_manager.update_db(newdocumentStruct=newdocstruct,newversion=str(docver+1),documentname=docName)
         #client.post_to_connection(ConnectionId=NamesDict[recepientname],Data=json.dumps(msgdata).encode('utf-8'))
         print("character data is {}".format(body['data']))
         #broadcasting change activity to all connections
