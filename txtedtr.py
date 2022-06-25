@@ -456,7 +456,7 @@ def deleteThereTest():
 lastChngeRcvdFromThisUsr = {}
 
 sendAgainSent = {}
-sendAgainCntr = {}
+sendAgainCtr = {}
 
 def changeOccured():
     global sendAgainSent
