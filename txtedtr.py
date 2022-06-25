@@ -242,6 +242,8 @@ class Application(tk.Frame):
         self.end = 0
         self.justSent = ""
 
+        self.sendAgainMsg = None
+
     def handle_wait(self):
         # cancel the old job
         if self._after_id is not None:
@@ -304,35 +306,50 @@ class Application(tk.Frame):
         #     self.counter = 0
 
     def send_change(self):
-        if len(self.localBuffer) == 0 or (len(self.localBuffer) != 0 and (float(json.loads(self.localBuffer[-1])["change_id"]) <= float(self.justSent))):
-            if len(self.chngeBuffer) > 4:
-                i = 0
-                j = 0
-                self.localBuffer = self.chngeBuffer.copy()
-                while i < len(self.localBuffer):
-                    # self.after(j, self.sendNow)
-                    self.after(j, lambda x=i: self.sendNow(x))
-                    i += 4
-                    j += 800
-                self.end = i - 4
+        if app.sendAgainMsg is None:
+            if len(self.localBuffer) == 0 or (len(self.localBuffer) != 0 and (float(json.loads(self.localBuffer[-1])["change_id"]) <= float(self.justSent))):
+                if len(self.chngeBuffer) > 4:
+                    i = 0
+                    j = 0
+                    self.localBuffer = self.chngeBuffer.copy()
+                    while i < len(self.localBuffer):
+                        # self.after(j, self.sendNow)
+                        self.after(j, lambda x=i: self.sendNow(x))
+                        i += 4
+                        j += 800
+                    self.end = i - 4
+                else:
+                    #2bl l broadcast. h7ot l lastBrdcstChnge
+                    if len(self.chngeBuffer) != 0:
+                        lastChnge = json.loads(self.chngeBuffer.pop(-1)) # watch HEEEEREEE KAN EMPTY
+                        lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(list(self.chngesBroadcastByMe)) > 0 else -1
+                        self.chngeBuffer.append(json.dumps(lastChnge))
+
+                        cm.BroadCast(self.chngeBuffer)
+                        self.handle_wait()
+                        # handle-wait
+                        self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
+
+                        #23MLHA REGISTER FL SENT
+                        # print(self.chngeBuffer)
+                        # print(self.chngesBroadcastByMe)
+                self.chngeBuffer.clear()
             else:
-                #2bl l broadcast. h7ot l lastBrdcstChnge
-                if len(self.chngeBuffer) != 0:
-                    lastChnge = json.loads(self.chngeBuffer.pop(-1)) # watch HEEEEREEE KAN EMPTY
-                    lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(list(self.chngesBroadcastByMe)) > 0 else -1
-                    self.chngeBuffer.append(json.dumps(lastChnge))
-
-                    cm.BroadCast(self.chngeBuffer)
-                    self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
-
-                    #23MLHA REGISTER FL SENT
-                    # print(self.chngeBuffer)
-                    # print(self.chngesBroadcastByMe)
-            self.chngeBuffer.clear()
+                print("need to WAIT")
+                self.handle_wait()
+                # self.after(800, self.send_change) #h3mlha handlewait
         else:
-            print("need to WAIT")
+            result = []
+            for i in app.sendAgainMsg.split('&'):
+                if i not in result:
+                    result.append(i)
+            cm.BroadCast(result.pop(0))
+            if len(result) > 0:
+                app.sendAgainMsg = '&'.join(result)
+            else:
+                app.sendAgainMsg = None
+
             self.handle_wait()
-            # self.after(800, self.send_change) #h3mlha handlewait
 
         # if float(json.loads(self.localBuffer[-1])["change_id"]) > float(self.justSent):
         #     print("need to WAIT")
@@ -542,13 +559,22 @@ def changeOccured():
                         # EB3T MN AWL: MSG = str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
                         msg = "sendAgain " + str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
 
-                        if sentOnce == 3:
-                            sentOnce = 0
-
-                        if sentOnce == 0:
-                            app.after(500, lambda j=msg: cm.BroadCast(j))
+                        if app.sendAgainMsg is None:
+                            app.sendAgainMsg = msg
+                            print(msg)
                         else:
-                            sentOnce += 1
+                            app.sendAgainMsg = app.sendAgainMsg + '&' + msg
+                            print(app.sendAgainMsg)
+                        app.handle_wait()
+                        # app.after(500, lambda j=msg: cm.BroadCast(j))
+
+                        # if sentOnce == 3:
+                        #     sentOnce = 0
+                        #
+                        # if sentOnce == 0:
+                        #     app.after(500, lambda j=msg: cm.BroadCast(j))
+                        # else:
+                        #     sentOnce += 1
                         #sendAgainCtr[senderIDD] = 'done'
 
 
