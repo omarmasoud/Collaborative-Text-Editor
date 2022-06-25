@@ -246,6 +246,8 @@ class Application(tk.Frame):
         self.end = 0
         self.justSent = ""
 
+        self.listToSend = None
+
         self.sendAgainMsg = None
 
     def handle_wait(self):
@@ -283,7 +285,10 @@ class Application(tk.Frame):
             # self.chngeBuffer.append(json.dumps(lastChnge))
             self.localBuffer.insert(i+3, json.dumps(lastChnge))
 
-            cm.BroadCast(self.localBuffer[i:i + 4])
+            brdcstDct()
+            print("THIS",app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:i + 4], documentStruct=app.listToSend)
+
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[i+3])["change_id"]
@@ -296,7 +301,9 @@ class Application(tk.Frame):
                 list(self.chngesBroadcastByMe)) > 0 else -1
             self.localBuffer.append(json.dumps(lastChnge))
 
-            cm.BroadCast(self.localBuffer[i:len(self.localBuffer)])
+            brdcstDct()
+            print("THIS",app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend)
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
@@ -328,8 +335,9 @@ class Application(tk.Frame):
                         lastChnge = json.loads(self.chngeBuffer.pop(-1)) # watch HEEEEREEE KAN EMPTY
                         lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(list(self.chngesBroadcastByMe)) > 0 else -1
                         self.chngeBuffer.append(json.dumps(lastChnge))
-
-                        cm.BroadCast(self.chngeBuffer)
+                        brdcstDct()
+                        print("THIS",app.listToSend)
+                        cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend)
                         self.handle_wait()
                         # handle-wait
                         self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
@@ -657,9 +665,10 @@ def receiveChange(op, elem, parent_id, child_id, id):
         deleteThere(pos)
 
 
+
 def brdcstDct():
     brdcstDct = n.charPosCharr.copy()
-    n.printList()
+    # n.printList()
 
     for i in range(1, len(brdcstDct)):
         #WALLA 23ML COPY KDA KDA????
@@ -673,9 +682,16 @@ def brdcstDct():
                                 "parent_id": str(n.charPosCharr[i][j].parent_id),
                                 "child_id": str(n.charPosCharr[i][j].child_id)
                             }
+                # brdcstDct[i][j] = json.dumps(brdcstDct[i][j])
+                # print(json.loads(brdcstDct[i][j]))
     print(brdcstDct)
-    cm.BroadCast(brdcstDct)
-    n.printList()
+    app.listToSend = brdcstDct
+    # 2b3t timestamp kman
+    # 2b3t l dict f 2a5r segment
+
+    # print(brdcstDct)
+    # cm.BroadCast(brdcstDct)
+    # n.printList()
     # print(n.charPosCharr[1][2]['parent_id'])
 
 
