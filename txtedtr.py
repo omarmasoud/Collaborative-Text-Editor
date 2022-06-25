@@ -678,6 +678,7 @@ window = ttk.Window(themename='darkly')
 
 
 BUTTON_SPACING = 5
+LABEL_SPACING = 10
 
 window.title("Collaborative Text Editor")
 window.rowconfigure(0, minsize=800, weight=1)
@@ -705,20 +706,32 @@ btn_add_mark2 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mar
 #btn_start = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Start writing", command=btn12strtwrtng)
 #btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
 
-btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING + 5)
-btn_save.grid(row=1, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_duplicate.grid(row=2, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_my_cursor.grid(row=3, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_send_all.grid(row=4, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_connect.grid(row=5, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_disconnect.grid(row=6, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_add_char.grid(row=7, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_add_mark1.grid(row=8, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_add_mark2.grid(row=9, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_modified.grid(row=10, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_consistency.grid(row=11, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_start.grid(row=12, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_temp.grid(row=13, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+
+num_users_str = 'Number of users: xxx'
+num_users_text = tk.Label(fr_buttons, text = num_users_str, justify=tk.LEFT, font=('', 10))
+
+users_cursors_str = 'User 1: 1.0\nUser 2: 20.12\nUser 3: xxx.xx'
+users_cursors_text = tk.Label(fr_buttons, text = users_cursors_str, justify=tk.LEFT, font=('', 10))
+
+
+
+btn_open.grid(row=0, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING + 5)
+btn_save.grid(row=1, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+btn_duplicate.grid(row=2, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+#btn_my_cursor.grid(row=3, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+btn_send_all.grid(row=4, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+btn_connect.grid(row=5, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+btn_disconnect.grid(row=6, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+#btn_add_char.grid(row=7, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+btn_add_mark1.grid(row=8, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+btn_add_mark2.grid(row=9, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+#btn_modified.grid(row=10, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+#btn_consistency.grid(row=11, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+#btn_start.grid(row=12, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+#btn_temp.grid(row=13, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+
+num_users_text.grid(row=10, column=0, stick='ew', ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+users_cursors_text.grid(row=11, column=0, stick='ew',ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
 
 
 
