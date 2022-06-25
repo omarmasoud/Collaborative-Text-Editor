@@ -129,12 +129,12 @@ def btn7addchar():
     # print(txt_edit.get(txt_edit.index(tk.INSERT)))
     print(txt_edit.get(ind))
     elem = txt_edit.get(ind)
-    # print(n.charPosCharr)
-    print(n.charIdPos)
-    n.add_char_here(elem, posx, posy)
-    print(n.charIdPos)
-    # print(n.charPosCharr)
-    n.printList()
+    # print(CONSTANTS.GLOBAL_NODE.charPosCharr)
+    print(CONSTANTS.GLOBAL_NODE.charIdPos)
+    CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy)
+    print(CONSTANTS.GLOBAL_NODE.charIdPos)
+    # print(CONSTANTS.GLOBAL_NODE.charPosCharr)
+    CONSTANTS.GLOBAL_NODE.printList()
 
 
 def btn8addmrk():
@@ -262,7 +262,7 @@ class Application(tk.Frame):
             self.after_cancel(self._after_id)
 
         # create a new job
-        self._after_id = self.after(1000, self.send_change)
+        self._after_id = self.after(500, self.send_change)
 
     def handle_wait2(self):
         # cancel the old job
@@ -270,20 +270,9 @@ class Application(tk.Frame):
             self.after_cancel(self._after_id2)
 
         # create a new job
-        self._after_id2 = self.after(1000, self.send_change)
+        self._after_id2 = self.after(500, self.send_change)
 
     def sendNow(self, i):
-        # print(i)
-        # print(self.localBuffer[i:i + 4])
-
-        # i = self.counter
-        # if self.counter < len(self.localBuffer):
-        #     print("LOOOOK", self.localBuffer[i:i + 4])
-        # how h len = 9
-        # 0:4
-        # 4:8
-        # 8:12
-        # 0 4
         if (len(self.localBuffer) - i) >= 4:
             lastChnge = json.loads(self.localBuffer.pop(i+3))
             lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(
@@ -293,7 +282,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:i + 4], documentStruct=app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:i + 4])
 
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
@@ -309,7 +298,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)])
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
@@ -333,7 +322,7 @@ class Application(tk.Frame):
                         # self.after(j, self.sendNow)
                         self.after(j, lambda x=i: self.sendNow(x))
                         i += 4
-                        j += 800
+                        j += 1500
                     self.end = i - 4
                 else:
                     #2bl l broadcast. h7ot l lastBrdcstChnge
@@ -343,7 +332,7 @@ class Application(tk.Frame):
                         self.chngeBuffer.append(json.dumps(lastChnge))
                         brdcstDct()
                         print("THIS",app.listToSend)
-                        cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend)
+                        cm.BroadCast(msg=self.chngeBuffer)
                         self.handle_wait()
                         # handle-wait
                         self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
@@ -397,7 +386,6 @@ class Application(tk.Frame):
 
 
 
-
 def btnaddchar(indx1, indx2):
     global lastRcvdChnge
     global mnUserTany
@@ -416,19 +404,19 @@ def btnaddchar(indx1, indx2):
     # print(txt_edit.get(ind))
     elem = txt_edit.get(ind)
 
-    # print(n.charIdPos)
+    # print(CONSTANTS.GLOBAL_NODE.charIdPos)
     if mnUserTany:
-        n.add_char_here(elem, posx, posy, 1, charId)
+        CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy, 1, charId)
         mnUserTany = 0
     else:
-        newChange = n.add_char_here(elem, posx, posy)
+        newChange = CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy)
         newChange['lastRcvdChnge'] = str(lastRcvdChnge)
         # print(newChange)
         app.chngeBuffer.append(json.dumps(newChange))
         app.handle_wait()
         # cm.BroadCast(json.dumps(newChange))
-    # print(n.charIdPos) RAGGA3
-    # n.printList() RAGGA3
+    # print(CONSTANTS.GLOBAL_NODE.charIdPos) RAGGA3
+    # CONSTANTS.GLOBAL_NODE.printList() RAGGA3
 
 
 def on_insert(*args):
@@ -459,19 +447,19 @@ def btndelchar(indx):
     # print(txt_edit.get(ind))
     # elem = txt_edit.get(ind)
 
-    # print(n.charIdPos) RAGGA3
+    # print(CONSTANTS.GLOBAL_NODE.charIdPos) RAGGA3
     if mnUserTany:
-        n.del_char_here(posx, posy, 1, charId)
+        CONSTANTS.GLOBAL_NODE.del_char_here(posx, posy, 1, charId)
         mnUserTany = 0
     else:
-        newChange = n.del_char_here(posx, posy)
+        newChange = CONSTANTS.GLOBAL_NODE.del_char_here(posx, posy)
         newChange['lastRcvdChnge'] = str(lastRcvdChnge)
         # print(newChange)
         app.chngeBuffer.append(json.dumps(newChange))
         app.handle_wait()
         # cm.BroadCast(json.dumps(newChange))
-    # print(n.charIdPos) RAGGA3
-    # n.printList()
+    # print(CONSTANTS.GLOBAL_NODE.charIdPos) RAGGA3
+    # CONSTANTS.GLOBAL_NODE.printList()
 
 
 def on_delete(*args):
@@ -487,7 +475,7 @@ def on_delete(*args):
 
 
 def btn13anthr():
-    # n.add_char_here('h', 1, 0, 1, '500')
+    # CONSTANTS.GLOBAL_NODE.add_char_here('h', 1, 0, 1, '500')
     receiveChange('h', None, None, '500')
 
 
@@ -642,6 +630,7 @@ def changeOccured():
 
 
 
+
 def receiveChange(op, elem, parent_id, child_id, id):
     global mnUserTany
     global charId
@@ -653,42 +642,42 @@ def receiveChange(op, elem, parent_id, child_id, id):
             if parent_id == 'None':
                 # insertThere('1.0', elem)
                 # insertThere(str('1')+'.'+str('0'), elem) # 25ALLY DI 1,0 34AN MSH HA HANDLEHA FL DELETE
-                insertThere(str(len(n.charPosCharr) - 1) + '.' + str('0'), elem)
+                insertThere(str(len(CONSTANTS.GLOBAL_NODE.charPosCharr) - 1) + '.' + str('0'), elem)
             else:
-                parent_pos = n.charIdPos[parent_id]
+                parent_pos = CONSTANTS.GLOBAL_NODE.charIdPos[parent_id]
                 # parentposx = int(parent_pos.split('.')[0])
                 # parentposy = int(parent_pos.split('.')[1])
                 posy = parent_pos[1] + 1
                 pos = str(parent_pos[0]) + '.' + str(posy)
                 insertThere(pos, elem)
         else:
-            child_pos = n.charIdPos[child_id]
+            child_pos = CONSTANTS.GLOBAL_NODE.charIdPos[child_id]
             pos = str(child_pos[0]) + '.' + str(child_pos[1])
             insertThere(pos, elem)
     else:
         # don't need parent/child. only id
         # mmkn ml2ihush??? try except
-        charDelPos = n.charIdPos[id]
+        charDelPos = CONSTANTS.GLOBAL_NODE.charIdPos[id]
         pos = str(charDelPos[0]) + '.' + str(charDelPos[1])
         deleteThere(pos)
 
 
 
 def brdcstDct():
-    brdcstDct = n.charPosCharr.copy()
-    # n.printList()
+    brdcstDct = CONSTANTS.GLOBAL_NODE.charPosCharr.copy()
+    # CONSTANTS.GLOBAL_NODE.printList()
 
     for i in range(1, len(brdcstDct)):
         #WALLA 23ML COPY KDA KDA????
-        # if len(n.charPosCharr[i]) > 0:
-        brdcstDct[i] = n.charPosCharr[i].copy()
+        # if len(CONSTANTS.GLOBAL_NODE.charPosCharr[i]) > 0:
+        brdcstDct[i] = CONSTANTS.GLOBAL_NODE.charPosCharr[i].copy()
         for j in range(0, len(brdcstDct[i])):
             if brdcstDct[i][j] is not None:
                 brdcstDct[i][j] = {
-                                "elem": str(n.charPosCharr[i][j].elem),
-                                "my_id": str(n.charPosCharr[i][j].my_id),
-                                "parent_id": str(n.charPosCharr[i][j].parent_id),
-                                "child_id": str(n.charPosCharr[i][j].child_id)
+                                "elem": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].elem),
+                                "my_id": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].my_id),
+                                "parent_id": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].parent_id),
+                                "child_id": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].child_id)
                             }
                 # brdcstDct[i][j] = json.dumps(brdcstDct[i][j])
                 # print(json.loads(brdcstDct[i][j]))
@@ -699,8 +688,8 @@ def brdcstDct():
 
     # print(brdcstDct)
     # cm.BroadCast(brdcstDct)
-    # n.printList()
-    # print(n.charPosCharr[1][2]['parent_id'])
+    # CONSTANTS.GLOBAL_NODE.printList()
+    # print(CONSTANTS.GLOBAL_NODE.charPosCharr[1][2]['parent_id'])
 
 
 
@@ -720,13 +709,10 @@ def save_file():
 
 
 def open_file():
-    global n
     file = askopenfile(mode ='r', filetypes =[('Text Document', '*.txt')])
     if file is not None:
         content = file.read()
-        print(f'printing n1: {n.printList()}')
-        n = node.TextSeq()
-        print(f'printing n2: {n.printList()}')
+        CONSTANTS.GLOBAL_NODE = node.TextSeq()
         CONSTANTS.DELETE_SEMAPHORE = True
         txt_edit.delete("1.0", END)
         CONSTANTS.DELETE_SEMAPHORE = False
@@ -736,7 +722,6 @@ def open_file():
         cursor = f'{pos_x}.{pos_y}'
 
         for charact in content:
-            print(f' current: {cursor} - char: {charact}')
             txt_edit.insert(cursor, charact)
             if pos_y > 86 or charact == '\n':
                 pos_y = 0
@@ -744,38 +729,32 @@ def open_file():
                 continue
             pos_y = pos_y + 1
             cursor = f'{pos_x}.{pos_y}'
-            print(f' new cursor: {cursor}')
 
-    n.printList()
+    CONSTANTS.GLOBAL_NODE.printList()
 
 
 
 def btn_insert():
-    pos_x = 0
-    pos_y = 0
-    while pos_x <= 250:
-        if pos_y > 86:
+    current_location = txt_edit.index(INSERT)
+    current_location = current_location.split('.')
+    pos_x = int(current_location[0])
+    pos_y = int(current_location[1])
+    cursor = f'{pos_x}.{pos_y}'
+    for charact in window.clipboard_get():
+        if charact == '\n':
+            charact == '\\n'
+        txt_edit.insert(cursor, charact)
+        if pos_y > 86 or charact == '\n':
             pos_y = 0
             pos_x = pos_x + 1
-        cursor_index = f'{pos_x}.{pos_y}'
-        elem = txt_edit.get(cursor_index)
-
-        if len(elem) > 0:
-            n.add_char_here(elem, pos_x, pos_y)
-            if elem == '\n':
-                pos_y = 0
-                pos_x = pos_x + 1
-                continue
+            continue
         pos_y = pos_y + 1
-        cursor = cursor_index
-    n.printList()
-    convert_dict_to_text(n)
+        cursor = f'{pos_x}.{pos_y}'
 
 
 def convert_dict_to_text(textseq):
-    global n
-    n = node.TextSeq()
-    n.printList()
+    CONSTANTS.GLOBAL_NODE = node.TextSeq()
+    CONSTANTS.GLOBAL_NODE.printList()
     CONSTANTS.INSERT_SEMPAHORE = True
     for i in range(1, len(textseq.charPosCharr)):
         for j in range(0, len(textseq.charPosCharr[i])):
@@ -825,7 +804,7 @@ btn_add_mark2 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mar
 #btn_consistency = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Consistency Prob?", command=btn11fixprob)
 #btn_start = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Start writing", command=btn12strtwrtng)
 #btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
-btn_insert = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Insert", command=btn_insert)
+btn_insert = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Paste", command=btn_insert)
 btn_test_dict_conv = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Convert Dict", command=convert_dict_to_text)
 
 num_users_str = 'Number of users: xxx'
