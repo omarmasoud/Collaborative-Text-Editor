@@ -14,15 +14,18 @@ import json
 import time
 
 
+# BISHOY
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-
+import customconstants as CONSTANTS
+from tkinter.filedialog import asksaveasfile, askopenfile
+# END OF BSHOY
 
 
 lastRcvdChnge = -1
 
 
-def open_file():
+def open_file2():
     """Open a file for editing."""
 
     txt_edit.delete(1.0, tk.END)
@@ -42,7 +45,7 @@ def open_file():
     txt_edit.edit_modified(0)
 
 
-def save_file():
+def save_file2():
     """Save the current file as a new file."""
     filepath = "D:/New folder (2)/dstrbtd text file/dst.txt"
     # filepath = asksaveasfilename(
@@ -462,6 +465,8 @@ def btndelchar(indx):
 
 
 def on_delete(*args):
+    if CONSTANTS.DELETE_SEMAPHORE == True:
+        return
     # print("DEL:", list(map(txt_edit.index, args)))
     indx = list(map(txt_edit.index, args))
     old_delete(*args)
@@ -661,11 +666,88 @@ def brdcstDct():
     n.printList()
     # print(n.charPosCharr[1][2]['parent_id'])
 
+# BISHOY
 
+def save_file():
+    files = [('Text Document', '*.txt')]
+    file = asksaveasfile(filetypes = files, defaultextension = files)
+    file.write(txt_edit.get("1.0", END))
+
+
+#msgtobesent={
+#    "freeze": freezevalue,
+#    "senderID":str(sender),
+#    "delta": Data,
+#    "numusers":str(len(connections)),
+#    "Userslocations" : json.dumps(list(NamesDict.values()))
+#    }
+
+def open_file():
+    global n
+    file = askopenfile(mode ='r', filetypes =[('Text Document', '*.txt')])
+    if file is not None:
+        content = file.read()
+        print(f'printing n1: {n.printList()}')
+        n = node.TextSeq()
+        print(f'printing n2: {n.printList()}')
+        CONSTANTS.DELETE_SEMAPHORE = True
+        txt_edit.delete("1.0", END)
+        CONSTANTS.DELETE_SEMAPHORE = False
+
+        pos_x = 1
+        pos_y = 0
+        cursor = f'{pos_x}.{pos_y}'
+
+        for charact in content:
+            print(f' current: {cursor} - char: {charact}')
+            txt_edit.insert(cursor, charact)
+            if pos_y > 86 or charact == '\n':
+                pos_y = 0
+                pos_x = pos_x + 1
+                continue
+            pos_y = pos_y + 1
+            cursor = f'{pos_x}.{pos_y}'
+            print(f' new cursor: {cursor}')
+
+    n.printList()
+
+
+
+def btn_insert():
+    pos_x = 0
+    pos_y = 0
+    while pos_x <= 250:
+        if pos_y > 86:
+            pos_y = 0
+            pos_x = pos_x + 1
+        cursor_index = f'{pos_x}.{pos_y}'
+        elem = txt_edit.get(cursor_index)
+
+        if len(elem) > 0:
+            n.add_char_here(elem, pos_x, pos_y)
+            if elem == '\n':
+                pos_y = 0
+                pos_x = pos_x + 1
+                continue
+        pos_y = pos_y + 1
+        cursor = cursor_index
+    n.printList()
+    convert_dict_to_text(n)
+
+
+def convert_dict_to_text(textseq):
+    global n
+    n = node.TextSeq()
+    n.printList()
+    CONSTANTS.INSERT_SEMPAHORE = True
+    for i in range(1, len(textseq.charPosCharr)):
+        for j in range(0, len(textseq.charPosCharr[i])):
+            txt_edit.insert(f'{i}.{j}', textseq.charPosCharr[i][j].get_elem())
+    CONSTANTS.INSERT_SEMPAHORE = False
 
 # cm = ConnectionManager()
 cm = connection_manager()
-
+global n
 n = node.TextSeq()
 
 window = ttk.Window(themename='darkly')
@@ -675,6 +757,7 @@ window = ttk.Window(themename='darkly')
 
 # txt_edit.bind("<KeyRelease>", btn10edted)
 
+# ======================================================== [ GUI FUNCTION ] ========================================================
 
 
 BUTTON_SPACING = 5
@@ -705,33 +788,32 @@ btn_add_mark2 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mar
 #btn_consistency = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Consistency Prob?", command=btn11fixprob)
 #btn_start = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Start writing", command=btn12strtwrtng)
 #btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
-
+btn_insert = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Insert", command=btn_insert)
+btn_test_dict_conv = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Convert Dict", command=convert_dict_to_text)
 
 num_users_str = 'Number of users: xxx'
 num_users_text = tk.Label(fr_buttons, text = num_users_str, justify=tk.LEFT, font=('', 10))
-
 users_cursors_str = 'User 1: 1.0\nUser 2: 20.12\nUser 3: xxx.xx'
 users_cursors_text = tk.Label(fr_buttons, text = users_cursors_str, justify=tk.LEFT, font=('', 10))
 
+btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING + 5)
+btn_save.grid(row=1, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_duplicate.grid(row=2, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_my_cursor.grid(row=3, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_send_all.grid(row=4, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_connect.grid(row=5, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_disconnect.grid(row=6, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_add_char.grid(row=7, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_add_mark1.grid(row=8, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_add_mark2.grid(row=9, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_modified.grid(row=10, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_consistency.grid(row=11, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_start.grid(row=12, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+#btn_temp.grid(row=13, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
+btn_insert.grid(row=10, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
 
-
-btn_open.grid(row=0, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING + 5)
-btn_save.grid(row=1, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-btn_duplicate.grid(row=2, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-#btn_my_cursor.grid(row=3, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-btn_send_all.grid(row=4, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-btn_connect.grid(row=5, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-btn_disconnect.grid(row=6, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-#btn_add_char.grid(row=7, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-btn_add_mark1.grid(row=8, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-btn_add_mark2.grid(row=9, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-#btn_modified.grid(row=10, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-#btn_consistency.grid(row=11, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-#btn_start.grid(row=12, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-#btn_temp.grid(row=13, column=0, sticky="ew", padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-
-num_users_text.grid(row=10, column=0, stick='ew', ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-users_cursors_text.grid(row=11, column=0, stick='ew',ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+num_users_text.grid(row=11, column=0, stick='ew', ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+users_cursors_text.grid(row=12, column=0, stick='ew',ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
 
 
 
@@ -744,6 +826,7 @@ old_delete = redir.register("delete", on_delete)
 
 
 
+# ======================================================== [ END OF GUI ] ========================================================
 
 
 app = Application(window)
@@ -752,6 +835,7 @@ app.mainloop()
 
 
 
+# END OF BSHOY
 
 
 
