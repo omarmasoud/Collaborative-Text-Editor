@@ -13,7 +13,11 @@ import json
 
 import time
 
+from datetime import datetime
+
 lastRcvdChnge = -1
+
+
 
 
 def open_file():
@@ -346,6 +350,7 @@ class Application(tk.Frame):
             cm.BroadCast(result.pop(0))
             if len(result) > 0:
                 app.sendAgainMsg = '&'.join(result)
+                print("b3d l pop wl cleaning", app.sendAgainMsg)
             else:
                 app.sendAgainMsg = None
 
@@ -487,6 +492,19 @@ lastChngeRcvdFromThisUsr = {}
 # sendAgainSent = {}
 # sendAgainCtr = {}
 sentOnce = 0
+
+def btnRcv():
+    global cm
+    global n
+    # change = cm.ws.recv()
+    # print(1)
+    # window.destroy()
+    txt_edit.delete(1.0, tk.END)
+    cm = connection_manager()
+    print("3mlt connect")
+    n = node.TextSeq()
+
+
 def changeOccured():
     # global sendAgainSent
     # global sendAgainCtr
@@ -495,8 +513,11 @@ def changeOccured():
     global lastRcvdChnge
     while 1:
         change = cm.ws.recv()
-
+        print(datetime.timestamp(datetime.now()))
         print(change)
+        # print(change)
+        if change == None or change == ' ':
+            print("empty response received")
         change = json.loads(change)
         if "delta" in change:  # and (chnge["freeze"] !="false"):
             senderIDD = "-1"
@@ -522,7 +543,7 @@ def changeOccured():
             if isinstance(change, str) and change.split()[0] == "sendAgain":
                 # print("REQUEST TO SEND AGAAAAIIIINNNN")
                 # print(change)
-                # print("sendAgain eh???? ", change.split()[1])
+                print("sendAgain recvd")
                 delay = 500
                 if change.split()[1].lstrip().rstrip() == "-1":
                     # print("d5lt hna?")
@@ -556,6 +577,7 @@ def changeOccured():
                     if str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip() != str(json.loads(change[-1])["lastBrdcstChnge"]).rstrip().lstrip():
                         # print(lastChngeRcvdFromThisUsr[senderIDD], " ", json.loads(change[-1])["lastBrdcstChnge"])
                         # print("ERRRORRRRRORRRRORRRR FI 7AGA MGTSH FL NOSSSS*****************")
+                        print("errorrr")
                         # DONT CALL RECEIVE CHNGE
                         # EB3T MN AWL: MSG = str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
                         msg = "sendAgain " + str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip()
@@ -660,6 +682,7 @@ def brdcstDct():
 
 # cm = ConnectionManager()
 cm = connection_manager()
+print("3mlt connect")
 
 n = node.TextSeq()
 
@@ -686,6 +709,7 @@ btn_12 = tk.Button(fr_buttons, text="Start writing", command=btn12strtwrtng)
 btn_13 = tk.Button(fr_buttons, text="USER TANY 7T H", command=btn13anthr)
 btn_14 = tk.Button(fr_buttons, text="delete pos 1.2", command=deleteThereTest)
 btn_15 = tk.Button(fr_buttons, text="broadcast dict", command=brdcstDct)
+btn_16 = tk.Button(fr_buttons, text="receive", command=btnRcv)
 
 btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 btn_save.grid(row=1, column=0, sticky="ew", padx=5)
@@ -703,6 +727,7 @@ btn_12.grid(row=12, column=0, sticky="ew", padx=5)
 btn_13.grid(row=13, column=0, sticky="ew", padx=5)
 btn_14.grid(row=14, column=0, sticky="ew", padx=5)
 btn_15.grid(row=15, column=0, sticky="ew", padx=5)
+btn_16.grid(row=15, column=0, sticky="ew", padx=5)
 
 # lw l text deleted cursor position????
 
