@@ -282,7 +282,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:i + 4])
+            cm.BroadCast(msg=self.localBuffer[i:i + 4],  documentStruct=app.listToSend)
 
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
@@ -298,7 +298,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)])
+            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend)
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
@@ -332,7 +332,7 @@ class Application(tk.Frame):
                         self.chngeBuffer.append(json.dumps(lastChnge))
                         brdcstDct()
                         print("THIS",app.listToSend)
-                        cm.BroadCast(msg=self.chngeBuffer)
+                        cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend)
                         self.handle_wait()
                         # handle-wait
                         self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
