@@ -1,5 +1,5 @@
 DELETE_SEMAPHORE = False
-INSERT_SEMAPHORE = False
+WRITING_SEMPAHORE = False
 
 import node
 

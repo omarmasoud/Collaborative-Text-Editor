@@ -274,6 +274,8 @@ class Application(tk.Frame):
         self._after_id2 = self.after(500, self.send_change)
 
     def sendNow(self, i):
+        if CONSTANTS.WRITING_SEMPAHORE == True:
+            return
         if (len(self.localBuffer) - i) >= 4:
             lastChnge = json.loads(self.localBuffer.pop(i+3))
             lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(
@@ -283,7 +285,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:i + 4])
+            cm.BroadCast(msg=self.localBuffer[i:i + 4], documentStruct=app.listToSend)
 
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
@@ -299,7 +301,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)])
+            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend)
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
@@ -313,6 +315,8 @@ class Application(tk.Frame):
         #     self.counter = 0
 
     def send_change(self):
+        if CONSTANTS.WRITING_SEMPAHORE == True:
+            return
         if app.sendAgainMsg is None:
             if len(self.localBuffer) == 0 or (len(self.localBuffer) != 0 and (float(json.loads(self.localBuffer[-1])["change_id"]) <= float(self.justSent))):
                 if len(self.chngeBuffer) > 4:
@@ -333,7 +337,7 @@ class Application(tk.Frame):
                         self.chngeBuffer.append(json.dumps(lastChnge))
                         brdcstDct()
                         print("THIS",app.listToSend)
-                        cm.BroadCast(msg=self.chngeBuffer)
+                        cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend)
                         self.handle_wait()
                         # handle-wait
                         self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
@@ -481,7 +485,9 @@ def btn13anthr():
 
 
 def insertThere(pos, elem):
+    CONSTANTS.WRITING_SEMPAHORE = True
     txt_edit.insert(pos, elem)
+    CONSTANTS.WRITING_SEMPAHORE = False
 
 
 def deleteThere(pos):
@@ -798,11 +804,11 @@ def btn_insert():
 def convert_dict_to_text(textseq):
     CONSTANTS.GLOBAL_NODE = node.TextSeq()
     CONSTANTS.GLOBAL_NODE.printList()
-    CONSTANTS.INSERT_SEMPAHORE = True
+    CONSTANTS.WRITING_SEMPAHORE = True
     for i in range(1, len(textseq.charPosCharr)):
         for j in range(0, len(textseq.charPosCharr[i])):
             txt_edit.insert(f'{i}.{j}', textseq.charPosCharr[i][j].get_elem())
-    CONSTANTS.INSERT_SEMPAHORE = False
+    CONSTANTS.WRITING_SEMPAHORE = False
 
 
 def btn_cloud_document():
@@ -864,10 +870,10 @@ btn_hightlight_users.grid(row=3, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SP
 btn_unhightlight_users.grid(row=4, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_cloud_document.grid(row=5, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 # =========================================================== [ LABELS ] ===========================================================
-num_users_str = 'Number of users: xxx'
+num_users_str = 'Number of users:'
 num_users_text = tk.Label(fr_buttons, text = num_users_str, justify=tk.LEFT, font=('', 10))
 
-users_cursors_str = 'User 1: 1.0\nUser 2: 20.12\nUser 3: xxx.xx'
+users_cursors_str = 'User 1: 0.0'
 users_cursors_text = tk.Label(fr_buttons, text = users_cursors_str, justify=tk.LEFT, font=('', 10))
 # ------------------------------------ [ SET LABELS GRID ] ------------------------------------
 num_users_text.grid(row=6, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
