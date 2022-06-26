@@ -814,6 +814,9 @@ def convert_dict_to_text(textseq):
 def btn_cloud_document():
     print('DO SOMETHING HERE')
 
+def btn_create_cloud_document():
+    print('DO ssssss here')
+
 
 cm = connection_manager()
 
@@ -862,6 +865,7 @@ btn_unhightlight_users = ttk.Button(fr_buttons, bootstyle='danger-outline', text
 #btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
 btn_insert = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Paste", command=btn_insert)
 btn_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Cloud Documents", command=btn_cloud_document)
+btn_create_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Create Doucment", command=btn_create_cloud_document)
 # ------------------------------------ [ SET BUTTONS GRID ] ------------------------------------
 btn_open.grid(row=0, column=0, sticky="ew", padx=CONSTANTS.FIRST_BUTTON_SPACING_X, pady=CONSTANTS.FIRST_BUTTON_SPACING_Y)
 btn_save.grid(row=1, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
@@ -869,15 +873,20 @@ btn_insert.grid(row=2, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, p
 btn_hightlight_users.grid(row=3, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_unhightlight_users.grid(row=4, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_cloud_document.grid(row=5, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
+btn_create_cloud_document.grid(row=6, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 # =========================================================== [ LABELS ] ===========================================================
+cloud_document_str = 'Placeholder for cloud document'
+cloud_document_text = ttk.Text(fr_buttons, wrap="word", bd=1, font=('', 8),width=1,height=1, highlightcolor='blue')
+
 num_users_str = 'Number of users:'
 num_users_text = tk.Label(fr_buttons, text = num_users_str, justify=tk.LEFT, font=('', 10))
 
 users_cursors_str = 'User 1: 0.0'
 users_cursors_text = tk.Label(fr_buttons, text = users_cursors_str, justify=tk.LEFT, font=('', 10))
 # ------------------------------------ [ SET LABELS GRID ] ------------------------------------
-num_users_text.grid(row=6, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
-users_cursors_text.grid(row=7, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+cloud_document_text.grid(row=7, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+num_users_text.grid(row=8, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+users_cursors_text.grid(row=9, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
 
 
 # =========================================================== [ MAIN GUI GRIDS ] ===========================================================
