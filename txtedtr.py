@@ -543,6 +543,15 @@ def changeOccured():
             index += 1
             temp_users_text += f'{index}. {usr[0]}: {usr[1]}\n'
         users_cursors_text.config(text = temp_users_text)
+        if ("freeze" in change) and change["freeze"] =="true":
+            if ("document" in change):
+                documentfromserver=change["document"]
+                convert_dict_to_text(documentfromserver)
+
+
+                #print(documentfromserver)
+
+                
 
         if "delta" in change:  # and (chnge["freeze"] !="false"):
             senderIDD = "-1"
@@ -802,16 +811,26 @@ def btn_insert():
 
 
 def convert_dict_to_text(textseq):
+    # CONSTANTS.GLOBAL_NODE = node.TextSeq()
+    # CONSTANTS.GLOBAL_NODE.printList()
+    # CONSTANTS.WRITING_SEMPAHORE = True
+    # for i in range(1, len(textseq.charPosCharr)):
+    #     for j in range(0, len(textseq.charPosCharr[i])):
+    #         txt_edit.insert(f'{i}.{j}', textseq.charPosCharr[i][j].get_elem())
+    # CONSTANTS.WRITING_SEMPAHORE = False
+    
     CONSTANTS.GLOBAL_NODE = node.TextSeq()
-    CONSTANTS.GLOBAL_NODE.printList()
+    CONSTANTS.GLOBAL_NODE.printList()a
     CONSTANTS.WRITING_SEMPAHORE = True
-    for i in range(1, len(textseq.charPosCharr)):
-        for j in range(0, len(textseq.charPosCharr[i])):
-            txt_edit.insert(f'{i}.{j}', textseq.charPosCharr[i][j].get_elem())
+    for i in range(1, len(textseq)):
+        for j in range(0, len(textseq[i])):
+            txt_edit.insert(f'{i}.{j}', textseq[i][j]['elem'])
+
     CONSTANTS.WRITING_SEMPAHORE = False
 
 
 def btn_cloud_document():
+    cm.GetDocument()
     print('DO SOMETHING HERE')
 
 def btn_create_cloud_document():

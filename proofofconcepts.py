@@ -58,11 +58,11 @@ resp=t1.put_item(
        
 )
 res=t1.update_item(Key={"documentName":"firstDocument"},
-    UpdateExpression="SET versions = list_append(versions, :newversion)  , currentVersion = :ver , currentDocument = :doc ",
+    UpdateExpression="SET versions =  :newversion  , currentVersion = :ver , currentDocument = :doc ",
     ExpressionAttributeValues={
-        ':newversion': [{"id":12131,"pid":42332,"cid":3233}],
-        ":ver":"323",
-        ":doc": [{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":4},{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}]
+        ':newversion': [],
+        ":ver":"0",
+        ":doc": []
     },
     ReturnValues="UPDATED_NEW"
 

@@ -2,7 +2,7 @@
 import websocket
 import threading
 import json
-
+import time
 class connection_manager:
     def __init__(self):
         self.wsconnectionurl='wss://bp491r2577.execute-api.eu-central-1.amazonaws.com/production'
@@ -28,8 +28,8 @@ class connection_manager:
     def setPosition(self,pos):
         self.ws.send(json.dumps({"action":"setPosition","position":pos}))
 
-    def GetDocument(self):
-        self.ws.send(json.dumps({"action":"GetDocument"}))
+    def GetDocument(self,name="firstDocument"):
+        self.ws.send(json.dumps({"action":"GetDocument","name":name}))
 
     def GetID(self):
         self.ws.send(json.dumps({"action":"getID"}))
@@ -40,4 +40,18 @@ class connection_manager:
     def SendTextDictionary(self,txtDict):
         self.ws.send(json.dumps({"action":"getText","text":txtDict}))
 
-#cm=connection_manager()
+# cm=connection_manager()
+# def reciverrr():
+#     while True:
+#             resp=cm.ws.recv()
+#             ### todo
+#             ## process recieved data
+#             print(resp)
+
+#cm.GetDocument()
+# th=threading.Thread(target=reciverrr)
+# th.start()
+# while True:
+   
+#     cm.GetDocument()
+#     time.sleep(10)
