@@ -6,9 +6,9 @@ import json
 class connection_manager:
     def __init__(self):
         self.wsconnectionurl='wss://bp491r2577.execute-api.eu-central-1.amazonaws.com/production'
-        self.ws=websocket.create_connection(self.wsconnectionurl,timeout=200000)
-        # self.receiverthread=threading.Thread(target=self.reciever_function)
-        # self.receiverthread.start()
+        self.ws = websocket.WebSocket()
+        self.ws.connect(self.wsconnectionurl)
+
 
     def reciever_function(self):
         while True:
@@ -21,7 +21,7 @@ class connection_manager:
         print("going to broadcast this msg")
         print(msg)
         self.ws.send(json.dumps({"action":"updateAll","data":msg,"documentStruct":documentStruct,"docName":documentname}))
-    
+
 
     def setname(self,name):
         self.ws.send(json.dumps({"action":"setName","name":name}))

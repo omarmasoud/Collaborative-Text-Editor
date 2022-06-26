@@ -262,7 +262,7 @@ class Application(tk.Frame):
             self.after_cancel(self._after_id)
 
         # create a new job
-        self._after_id = self.after(500, self.send_change)
+        self._after_id = self.after(200, self.send_change)
 
     def handle_wait2(self):
         # cancel the old job
@@ -270,7 +270,7 @@ class Application(tk.Frame):
             self.after_cancel(self._after_id2)
 
         # create a new job
-        self._after_id2 = self.after(500, self.send_change)
+        self._after_id2 = self.after(200, self.send_change)
 
     def sendNow(self, i):
         if (len(self.localBuffer) - i) >= 4:
@@ -322,7 +322,7 @@ class Application(tk.Frame):
                         # self.after(j, self.sendNow)
                         self.after(j, lambda x=i: self.sendNow(x))
                         i += 4
-                        j += 1500
+                        j += 200
                     self.end = i - 4
                 else:
                     #2bl l broadcast. h7ot l lastBrdcstChnge
@@ -548,7 +548,7 @@ def changeOccured():
                 # print("REQUEST TO SEND AGAAAAIIIINNNN")
                 # print(change)
                 print("sendAgain recvd")
-                delay = 500
+                delay = 100
                 if change.split()[1].lstrip().rstrip() == "-1":
                     # print("d5lt hna?")
                     for i in range(0, len(list(app.chngesBroadcastByMe))):
@@ -558,7 +558,7 @@ def changeOccured():
                         #
                         #     #cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                         app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
-                        delay+=800
+                        delay+=100
                         # print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                 else:
                     # print("tyb hna?")
@@ -566,7 +566,7 @@ def changeOccured():
                     # print("last rcvd by that usr: ", indOfLastChangeUserRcvd)
                     for i in range(indOfLastChangeUserRcvd + 1, len(list(app.chngesBroadcastByMe))):
                         app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
-                        delay+=800
+                        delay+=100
                         # print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                         # app.chngeBuffer.append(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]]) # JSON DUMPSSSSSSS????????
 
