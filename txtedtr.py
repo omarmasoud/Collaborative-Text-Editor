@@ -483,6 +483,7 @@ def btndelchar(indx):
 
 
 def on_delete(*args):
+    global insertingList
     if CONSTANTS.DELETE_SEMAPHORE == True:
         return
     # print("DEL:", list(map(txt_edit.index, args)))
@@ -490,7 +491,8 @@ def on_delete(*args):
     old_delete(*args)
     # print("hi, ", indx[0])
     # l index l tany indx[1]
-    btndelchar(indx[0])
+    if insertingList == False:
+        btndelchar(indx[0])
     # DOESN'T HANDLE MORE THAN ONE CHAR DEL YET. ALSO ADD CAN GET THE INDEX BUT NOT HANDLED
 
 
@@ -792,7 +794,7 @@ def open_file():
         content = file.read()
         CONSTANTS.GLOBAL_NODE = node.TextSeq()
         CONSTANTS.DELETE_SEMAPHORE = True
-        txt_edit.delete("1.0", END)
+        txt_edit.delete("1.0", tk.END)
         CONSTANTS.DELETE_SEMAPHORE = False
 
         pos_x = 1
@@ -842,17 +844,23 @@ def convert_dict_to_text(textseq):
     CONSTANTS.GLOBAL_NODE = node.TextSeq()
     CONSTANTS.GLOBAL_NODE.printList()
 
+
+    # txt_edit.delete(1.0, tk.END)
+    # txt_edit.delete("start", "end")
+    insertingList = True
+    txt_edit.delete("1.0", tk.END)
+
     CONSTANTS.WRITING_SEMPAHORE = True
     CONSTANTS.DELETE_SEMAPHORE = True  # sh8aaaal?????
-    insertingList = True
 
-    txt_edit.delete(1.0, tk.END)
+
+
     for i in range(1, len(textseq)):
         if len(CONSTANTS.GLOBAL_NODE.charPosCharr) != len(textseq):
             CONSTANTS.GLOBAL_NODE.charPosCharr.append([])
         for j in range(0, len(textseq[i])):
             txt_edit.insert(f'{i}.{j}', textseq[i][j]['elem'])
-            print(i, j)
+            # print(i, j)
             if textseq[i][j]['parent_id'] == "None" and textseq[i][j]['child_id'] == "None":
                 CONSTANTS.GLOBAL_NODE.charPosCharr[i].append(node.Node(textseq[i][j]['elem'],
                                                                      float(textseq[i][j]['my_id']),
@@ -878,6 +886,8 @@ def convert_dict_to_text(textseq):
     CONSTANTS.WRITING_SEMPAHORE = False
     CONSTANTS.DELETE_SEMAPHORE = False
     insertingList = False
+    print(textseq)
+    CONSTANTS.GLOBAL_NODE.printList()
 
 
 stopResend = 0
@@ -886,7 +896,7 @@ stopResend = 0
 def btn_cloud_document():
     global stopResend  # h8ayyar l name bta3y?
     CONSTANTS.WRITING_SEMPAHORE = True
-    CONSTANTS.DELETE_SEMAPHORE = True
+    # CONSTANTS.DELETE_SEMAPHORE = True
     # WAIT FOR RECEIVE
     # STOP ALL SENDING
     # STOP CHECKING BROADCAST BY ME
