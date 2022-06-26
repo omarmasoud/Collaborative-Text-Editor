@@ -404,7 +404,6 @@ def btnaddchar(indx1, indx2):
     global lastRcvdChnge
     global mnUserTany
     global charId
-    global insertingList
 
     # get position l cursor
     # print(txt_edit.index(tk.INSERT))
@@ -420,22 +419,23 @@ def btnaddchar(indx1, indx2):
     elem = txt_edit.get(ind)
 
     # print(CONSTANTS.GLOBAL_NODE.charIdPos)
-    if insertingList == False:
-        if mnUserTany:
-            CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy, 1, charId)
-            mnUserTany = 0
-        else:
-            newChange = CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy)
-            newChange['lastRcvdChnge'] = str(lastRcvdChnge)
-            # print(newChange)
-            app.chngeBuffer.append(json.dumps(newChange))
-            app.handle_wait()
+
+    if mnUserTany:
+        CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy, 1, charId)
+        mnUserTany = 0
+    else:
+        newChange = CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy)
+        newChange['lastRcvdChnge'] = str(lastRcvdChnge)
+        # print(newChange)
+        app.chngeBuffer.append(json.dumps(newChange))
+        app.handle_wait()
         # cm.BroadCast(json.dumps(newChange))
     # print(CONSTANTS.GLOBAL_NODE.charIdPos) RAGGA3
     # CONSTANTS.GLOBAL_NODE.printList() RAGGA3
 
 
 def on_insert(*args):
+    global insertingList
     # if CONSTANTS.WRITING_SEMPAHORE == True:
     #     return
     # print("INS:", txt_edit.index(args[0]))
@@ -443,7 +443,9 @@ def on_insert(*args):
     old_insert(*args)
     # print(txt_edit.index(args[0]))
     indx2 = txt_edit.index(args[0])
-    btnaddchar(indx1, indx2)
+
+    if insertingList == False:
+        btnaddchar(indx1, indx2)
 
 
 def btndelchar(indx):
@@ -846,28 +848,31 @@ def convert_dict_to_text(textseq):
 
     txt_edit.delete(1.0, tk.END)
     for i in range(1, len(textseq)):
+        if len(CONSTANTS.GLOBAL_NODE.charPosCharr) != len(textseq):
+            CONSTANTS.GLOBAL_NODE.charPosCharr.append([])
         for j in range(0, len(textseq[i])):
             txt_edit.insert(f'{i}.{j}', textseq[i][j]['elem'])
+            print(i, j)
             if textseq[i][j]['parent_id'] == "None" and textseq[i][j]['child_id'] == "None":
-                CONSTANTS.GLOBAL_NODE.charPosCharr[i][j] = node.Node(textseq[i][j]['elem'],
+                CONSTANTS.GLOBAL_NODE.charPosCharr[i].append(node.Node(textseq[i][j]['elem'],
                                                                      float(textseq[i][j]['my_id']),
-                                                                     None, None)
+                                                                     None, None))
 
             elif textseq[i][j]['parent_id'] != "None" and textseq[i][j]['child_id'] == "None":
-                CONSTANTS.GLOBAL_NODE.charPosCharr[i][j] = node.Node(textseq[i][j]['elem'],
+                CONSTANTS.GLOBAL_NODE.charPosCharr[i].append(node.Node(textseq[i][j]['elem'],
                                                                      float(textseq[i][j]['my_id']),
                                                                      float(textseq[i][j]['parent_id']),
-                                                                     None)
+                                                                     None))
 
             elif textseq[i][j]['parent_id'] == "None" and textseq[i][j]['child_id'] != "None":
-                CONSTANTS.GLOBAL_NODE.charPosCharr[i][j] = node.Node(textseq[i][j]['elem'],
+                CONSTANTS.GLOBAL_NODE.charPosCharr[i].append(node.Node(textseq[i][j]['elem'],
                                                                      float(textseq[i][j]['my_id']),
-                                                                     None, float(textseq[i][j]['child_id']))
+                                                                     None, float(textseq[i][j]['child_id'])))
             else:
-                CONSTANTS.GLOBAL_NODE.charPosCharr[i][j] = node.Node(textseq[i][j]['elem'],
+                CONSTANTS.GLOBAL_NODE.charPosCharr[i].append(node.Node(textseq[i][j]['elem'],
                                                                      float(textseq[i][j]['my_id']),
                                                                      float(textseq[i][j]['parent_id']),
-                                                                     float(textseq[i][j]['child_id']))
+                                                                     float(textseq[i][j]['child_id'])))
             CONSTANTS.GLOBAL_NODE.charIdPos[CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].my_id] = [i, j]
 
     CONSTANTS.WRITING_SEMPAHORE = False
