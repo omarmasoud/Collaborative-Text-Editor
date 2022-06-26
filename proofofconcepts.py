@@ -45,19 +45,19 @@ from AWSLambdaConnectionManager import connection_manager
 import boto3
 import json
 dbagent= boto3.resource('dynamodb',region_name='eu-central-1')
-t1=dbagent.Table('Collaborative-Text-Editor-Documents')
+t1=dbagent.Table('Collaborative-Text-Editor-Documents-replica')
 
 tcount=dbagent.tables.all()
-resp=t1.put_item(
+# resp=t1.put_item(
     
-    Item={"documentName":"firstDocument",
-    "currentVersion":"0",
-    "currentDocument":[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}],
-    "versions":[[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}],[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}],[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}]]
-    }
+#     Item={"documentName":"firstDocument",
+#     "currentVersion":"0",
+#     "currentDocument":[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}],
+#     "versions":[[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}],[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}],[{"id":1,"pid":2,"cid":3},{"id":1,"pid":2,"cid":3}]]
+#     }
        
-)
-res=t1.update_item(Key={"documentName":"firstDocument"},
+# )
+res=t1.update_item(Key={"documentName":"document habd"},
     UpdateExpression="SET versions =  :newversion  , currentVersion = :ver , currentDocument = :doc ",
     ExpressionAttributeValues={
         ':newversion': [],
@@ -67,12 +67,12 @@ res=t1.update_item(Key={"documentName":"firstDocument"},
     ReturnValues="UPDATED_NEW"
 
 )
-t1.put_item(Item={
-                "documentName":"docName",
-                "currentVersion":"0",
-                "currentDocument":[],
-                "versions":[]
-                }
-                )
-res=t1.get_item(Key={"documentName":"docName"})
-print (res['Item']['currentVersion'])
+# t1.put_item(Item={
+#                 "documentName":"docName",
+#                 "currentVersion":"0",
+#                 "currentDocument":[],
+#                 "versions":[]
+#                 }
+#                 )
+# res=t1.get_item(Key={"documentName":"docName"})
+# print (res['Item']['currentVersion'])

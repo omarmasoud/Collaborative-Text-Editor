@@ -26,26 +26,12 @@ client=boto3.client('apigatewaymanagementapi',endpoint_url=apigatewayUrl)
 connections=list()
 currconection=None# placeholder for new connection
 NamesDict={}
-clientsTexts={}
+connectionsForDocument={}
+documentopenedbyID={}
+#clientsTexts={}
 serverLastRecievedChangeTimeStamp=0
 
 
-def broadcast(Data,sender,freezevalue="false"):
-    #currconn=event['requestContext']['connectionId']
-    msgtobesent={
-    "freeze": freezevalue,
-    "senderID":str(sender),
-    "delta": Data,
-    "numusers":str(len(connections)),
-    "Userslocations" : json.dumps(list(NamesDict.values()))
-    }
-    for currentConnection in connections:
-        if currentConnection != sender:
-            try:
-                client.post_to_connection(ConnectionId=currentConnection,Data=json.dumps(msgtobesent).encode('utf-8'))
-            except:
-                pass
-            #sendto(connectionId=currentConnection,Data=Data)
 
 # def textComparatorHandler():
 #     while True:
@@ -80,8 +66,8 @@ class DbConnectionManager:
             print("couldn't reference table 1")
             
         try:
-            print("will fill later")
-            #self.t2=self.dbagent.Table('collaborativedump')#primary dynamodb table
+            #print("will fill later")
+            self.t2=self.dbagent.Table('Collaborative-Text-Editor-Documents-replica')#primary dynamodb table
         except:
             self.t2=None
             print("couldn't reference table 2")
@@ -97,12 +83,13 @@ class DbConnectionManager:
         except:
             self.table1down=True
         try:
-           # self.t2.put_item(Item=item)
+            self.t2.put_item(Item=item)
             #self.t2.put_item(Item=item)#inserting to replica
             self.table2down=False
         except:
             self.table2down=True
         pass
+    
     def remove_from_db(self,partKey):
         try:
             self.t1.delete_item(Ket=partKey)
@@ -111,35 +98,59 @@ class DbConnectionManager:
         except:
             self.table1down=True
         try:
-           # self.t2.delete_item(Ket=partKey)
+            self.t2.delete_item(Ket=partKey)
             #self.t2.put_item(Item=item)#inserting to replica
             self.table2down=False
         except:
             self.table2down=True
         pass
-    def retreive_from_db(self,key):
-        self.t1.get_item(Key=key)
-        item=None
+    def created_doc(self,documentName):
         try:
-            item=self.t1.get_item(Key=key)
+            self.t1.put_item(Item={
+                "documentName":documentName,
+                "currentVersion":"0",
+                "currentDocument":[],
+                "versions":[]
+                }
+                )
             #self.t2.put_item(Item=item)#inserting to replica
             self.table1down=False
         except:
             self.table1down=True
         try:
-           #item= self.t2.get_item(Key=key)
-            #self.t2.put_item(Item=item)#inserting to replica
+            self.t2.put_item(Item={
+                "documentName":documentName,
+                "currentVersion":"0",
+                "currentDocument":[],
+                "versions":[]
+                }
+                )
             self.table2down=False
         except:
             self.table2down=True
-            return item['Item']
+        pass
         
+    def retreive_from_db(self,key):
+        
+        #self.t1.get_item(Key={"documentName":str(key)})
+        item=None
+        try:
+            item=self.t1.get_item(Key={"documentName":str(key)})
+            #self.t2.put_item(Item=item)#inserting to replica
+            self.table1down=False
+        except:
+            item=self.t2.get_item(Key={"documentName":str(key)})
+            self.table1down=True
+        print("item keys are {}".format(item.keys()))
+        return item['Item']
+    ############ LEGACY METHOD ########################
+    ### this method is legacy and left just in case if needed later ########
     def scan_db(self):
         
         scanlst=None
         
         try:
-           # scanlst=self.t2.scan()
+            #scanlst=self.t2.scan()
             #self.t2.put_item(Item=item)#inserting to replica
             self.table2down=False
         except:
@@ -153,6 +164,7 @@ class DbConnectionManager:
             
             
         return list(scanlst['Items'])
+        ################################## END LEGACY METHOD ###########################3
         
         pass
     def update_db(self,newdocumentStruct,newversion,documentname="firstDocument"):
@@ -171,27 +183,28 @@ class DbConnectionManager:
         except:
             self.table1down=True
         try:
-            # self.t2.update_item(
-            #     Key={"documentName":documentName},
-            #         UpdateExpression="SET versions = list_append(versions, :newdocument)  , currentVersion = :version , currentDocument = :doc ",
-            #         ExpressionAttributeValues={
-            #         ':newdocument': newdocument,
-            #         ":version":str(newversion),
-            #         ":doc": newdocument
-            #         },
-            #         ReturnValues="UPDATED_NEW"
-            #     )
+            self.t2.update_item(
+                Key={"documentName":documentname},
+                    UpdateExpression="SET versions = list_append(versions, :newdocument)  , currentVersion = :version , currentDocument = :doc ",
+                    ExpressionAttributeValues={
+                    ':newdocument': newdocumentStruct,
+                    ":version":str(newversion),
+                    ":doc": newdocumentStruct
+                    },
+                    ReturnValues="UPDATED_NEW"
+                )
             self.table2down=False
         except:
             self.table2down=True
             
     
-db_connection_manager=DbConnectionManager()
 
+db_connection_manager=DbConnectionManager()
 def lambda_handler(event, context):
-    
+   
     connectionId=event['requestContext']['connectionId']
     routeKey=event['requestContext']['routeKey']
+    print("event is {}".format(event))
     
     #on calling updateAll action for broadcasting a new change
     if routeKey =='updateAll':
@@ -212,19 +225,22 @@ def lambda_handler(event, context):
         docname=body['docName']
         #getting document entry from the database
         doc=db_connection_manager.retreive_from_db(docname)
-        
+        #userloc=body['mylocation']
+        #NamesDict[connectionId][1]=userloc
         docver=int(doc['currentVersion'])
         ##adding new version to database and updating version for that document
-        db_connection_manager.update_db(newdocumentStruct=newdocstruct,newversion=str(docver+1),documentname=docName)
+        
         #client.post_to_connection(ConnectionId=NamesDict[recepientname],Data=json.dumps(msgdata).encode('utf-8'))
         print("character data is {}".format(body['data']))
         #broadcasting change activity to all connections
-        broadcast(msgdata,connectionId)
+        broadcast(msgdata,connectionId,docname=docname)
         
+        db_connection_manager.update_db(newdocumentStruct=newdocstruct,newversion=str(docver+1),documentname=docname)
+        print("exit entering ")
         
         
         #logging change activity into database
-        db_connection_manager.insert_to_db({"charid":names.get_full_name(),"data":names.get_full_name(),"delta": msgdata})
+        #db_connection_manager.insert_to_db({"charid":names.get_full_name(),"data":names.get_full_name(),"delta": msgdata})
         # trying to broadcast all datbase entries
         #dblistentries=db_connection_manager.scan_db()
         #print(dblistentries[1]["charid"])
@@ -253,17 +269,22 @@ def lambda_handler(event, context):
         #Generate Random Name for new Connection,set initial cursor position at 0 
         NamesDict[connectionId]=[names.get_full_name(),0]
         notifymsg='{} has joined the session'.format(connectionId)
+        
+        
         #initial values on connect
-        clientsTexts['text']=" "
-        clientsTexts['textdict']=" "
+        #clientsTexts['text']=" "
+        #clientsTexts['textdict']=" "
+        
+        
         print(notifymsg)
-        #print('event is  ')
-        # print(event)
-        # sendMsgToConnection(connectionId,json.dumps(
-        #     {
-        #         "yourID":str(connectionId)
-        #     }
-        #     ))
+        msgtobesent={
+            "freeze": "true",
+            "newconnection":"yes",
+            "numusers":len(connections),
+            "Userslocations" :json.dumps(list(NamesDict.values()))
+        }
+        #return msgtobesent
+        
         #broadcast(json.dumps(notifymsg))
     ##Custom Set Name for a connection
     elif routeKey =='setName':
@@ -280,14 +301,14 @@ def lambda_handler(event, context):
         body=event['body']
         body=body.replace("'", "\"")
         body=json.loads(body)
-        clientsTexts['text']=body['text']
+        #clientsTexts['text']=body['text']
         
     #get text dictionary data structure api
     elif routeKey =='getTextDict':
         body=event['body']
         body=body.replace("'", "\"")
         body=json.loads(body)
-        clientsTexts['textdict']=body['textdict']
+        #clientsTexts['textdict']=body['textdict']
         
         
     #setting position of a user api
@@ -300,35 +321,72 @@ def lambda_handler(event, context):
         ##setting position of a connection
         NamesDict[connectionId][1]=body['position']
         
-        
+    
     ## api for getting the document  from database
-    elif routeKey=='GetDocument':
+    elif routeKey=='GetDocument': 
         
-        dblistentries=db_connection_manager.scan_db()
-        #print(dblistentries[1]["charid"])
-        broadcast("None",connectionId,freezevalue="true")
-        for i in range(len(dblistentries)):
-            if(len(dblistentries)>=10):
-                sendMsgToConnection(connectionId,{"entry":dblistentries[i:i+10]})
-                del dblistentries[i:i+10]
-                i+=10
-            else:
-                sendMsgToConnection(connectionId,{"entry":dblistentries})
-                dblistentries.clear()
-                break
-                
-        broadcast("None",connectionId,freezevalue="false")
+        body=event['body']
+        body=body.replace("'", "\"")
+        body=json.loads(body)
+        doctobesentname=body['name']
+        print("retrieving document of name {}".format(doctobesentname))
+        try:
+            doctobesent=db_connection_manager.retreive_from_db(doctobesentname)
+        except:
+            #default document if document to be queried was not found
+             doctobesentname="firstDocument"
+             doctobesent=db_connection_manager.retreive_from_db(doctobesentname)
+             
+        doctobesent=doctobesent['currentDocument']
+        print("printing document to be sent")
+        print(doctobesent)
+        if doctobesentname in connectionsForDocument:
+            connlist=connectionsForDocument[doctobesentname]
+        else:
+            connlist=list()
+            connlist.append(connectionId)
+        docconnections=list()
+        for con in connlist:
+            docconnections.append(NamesDict[con])
+        msg={
+            "freeze": "true",
+            "document":doctobesent,
+            "name":doctobesentname,
+            "numusers":len(connlist),
+            "Userslocations" :json.dumps(list(docconnections))
+            }
+        
+        sendMsgToConnection(connectionId,msg)
+        if(doctobesentname in connectionsForDocument):
+            connectionsForDocument[doctobesentname].append(connectionId)
+        else:
+            connectionsForDocument[doctobesentname]=list()
+            connectionsForDocument[doctobesentname].append(connectionId)
+        documentopenedbyID[connectionId]=doctobesentname
+        
+    elif routeKey=='createDocument':
+        body=event['body']
+        body=body.replace("'", "\"")
+        body=json.loads(body)
+        doctobecreatedname=body['name']
+        db_connection_manager.created_doc(doctobecreatedname)
+        connectionsForDocument[doctobecreatedname]=list()
+        connectionsForDocument[doctobecreatedname].append(connectionId)
+        documentopenedbyID[connectionId]=doctobecreatedname
         
         
-        # sendMsgToConnection(connectionId,dblistentries)
-        # print("document sent to connection {}".format(NamesDict[connectionId]))
-        
-    elif routeKey =='$disconnect':
+    #changed elif to if only for trying not to disconnect
+    if routeKey =='$disconnect':
         
         print('disconnecting now from connection {} '.format(connectionId))
         #print(event)
         currconn=event['requestContext']['connectionId']
-        
+        try:
+            documentconnectedto=documentopenedbyID[currconn]
+            connectionsForDocument[documentconnectedto].remove(currconn)
+            documentopenedbyID.pop(currconn)
+        except:
+            pass
         ##debugging message
         if currconn in connections:
             print('connection {} was already there at index {}'.format(currconn,connections.index(currconn)))
@@ -341,11 +399,11 @@ def lambda_handler(event, context):
             connections.remove(currconn)
         except:
             print('no name for connection {}'.format(currconn))
-        try:
-            clientsTexts.pop(currconn)
-        except:
-            print("connection of id {} had no client text entry in the dictionar".format(currconn))
-
+        # try:
+        #     clientsTexts.pop(currconn)
+        # except:
+        #     print("connection of id {} had no client text entry in the dictionar".format(currconn))
+    
     # TODO implement
     return {
         'statusCode': 200,
@@ -367,6 +425,24 @@ def sendMsgToConnection(uniqueConnection,Data):
     client.post_to_connection(ConnectionId=str(uniqueConnection),Data=json.dumps(Data).encode('utf-8'))
     
     
-
-
-        
+def broadcast(Data,sender,docname="firstDocument",freezevalue="false"):
+    #currconn=event['requestContext']['connectionId']
+    connlist=connectionsForDocument[docname]
+    docconnections=list()
+    for con in connlist:
+        docconnections.append(NamesDict[con])
+    #docconnections=NamesDict[connlist]
+    msgtobesent={
+    "freeze": freezevalue,
+    "senderID":str(sender),
+    "delta": Data,
+    "numusers":str(len(connlist)),
+    "Userslocations" : json.dumps(list(docconnections))
+    }
+    for currentConnection in connlist:
+        if currentConnection != sender:
+            try:
+                client.post_to_connection(ConnectionId=currentConnection,Data=json.dumps(msgtobesent).encode('utf-8'))
+            except:
+                pass
+            #sendto(connectionId=currentConnection,Data=Data)
