@@ -6,3 +6,5 @@ venv\scripts\python.exe -m pip install -r requirements.txt
 ECHO installing ttkbootstrap
 venv\scripts\python.exe -m pip install -e .
 ECHO ttkbootstrap environment setup is complete
+venv\scripts\python.exe -m pip install awscli .
+ECHO AWS CLI environment setup is complete
