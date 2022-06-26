@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creating DynamoDB tables for Collaborative Text Editor Team 38 with CloudFormation
+Resources:
+  primaryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Collaborative-Text-Editor-Documents
+      AttributeDefinitions:
+          AttributeName: documentName
+          AttributeType: S
+          BillingMode: PROVISIONED
+      KeySchema:
+          AttributeName: documentName
+          KeyType: HASH
+      Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput: 
+             ReadCapacityUnits: 10
+             WriteCapacityUnits: 10
+    secondaryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Collaborative-Text-Editor-Documents-replica
+      AttributeDefinitions:
+          AttributeName: documentName
+          AttributeType: S
+          BillingMode: PROVISIONED
+      KeySchema:
+          AttributeName: documentName
+          KeyType: HASH
+      Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput: 
+             ReadCapacityUnits: 10
+             WriteCapacityUnits: 10
+Outputs:
+  Student:
+    Description: Collaborative Text Editor Documents tables created successfuly with Cloud formation template
+    Value: !Ref primaryTable

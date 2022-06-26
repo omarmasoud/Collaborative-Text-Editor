@@ -7,3 +7,4 @@ awscli>=1.24.3
 aws-sam-cli>=1.47.0
 aws-lambda-builders>=1.15.0
 aws-sam-translator>=1.45.0
+boto3>=1.23.3
