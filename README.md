@@ -1,5 +1,9 @@
 # Collaborative-Text-Editor
 ## This is a course Project by team 38 for Distributed Computing Course CSE 354 Faculty of Engineering Ain Shams University
+---------------------------------------
+## Video link:
+[Team 38 Video](https://drive.google.com/drive/folders/16gc2Wgzru2LNZDZE-M6Gh4OLmJQ3dhwz)
+---------------------------------------
 ### Team Members:
 * Omar Khaled Mahmoud Mohamed	18P3067
 * Mohamed Amr Mohamed Ghonaim	18P2783
