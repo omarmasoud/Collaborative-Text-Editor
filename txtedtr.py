@@ -7,6 +7,7 @@ from idlelib.redirector import WidgetRedirector
 from ConnectionManager import *
 
 from AWSLambdaConnectionManager import connection_manager
+import AWSLambdaConnectionManager
 
 import node
 
@@ -24,8 +25,8 @@ from tkinter.filedialog import asksaveasfile, askopenfile
 
 lastRcvdChnge = -1
 
-
-openedDocument="firstDocument"
+openedDocumentAWS="firstDocument"
+#openedDocument="firstDocument"
 
 def open_file2():
     """Open a file for editing."""
@@ -86,7 +87,7 @@ def btn3sndbtn():
     print(txt_edit.get(1.0, "end-1c"))
     print('hi')
     txt_msg = txt_edit.get(1.0, "end-1c")
-    cm.BroadCast(txt_msg)
+    cm.BroadCast(txt_msg,documentname=openedDocumentAWS)
 
 # buffEnable = 0
 # def senderBuffHandler():
@@ -286,7 +287,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:i + 4], documentStruct=app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:i + 4], documentStruct=app.listToSend,documentname=openedDocumentAWS)
 
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
@@ -302,7 +303,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend,documentname=openedDocumentAWS)
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
@@ -338,7 +339,7 @@ class Application(tk.Frame):
                         self.chngeBuffer.append(json.dumps(lastChnge))
                         brdcstDct()
                         print("THIS",app.listToSend)
-                        cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend)
+                        cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend,documentname=openedDocumentAWS)
                         self.handle_wait()
                         # handle-wait
                         self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
@@ -356,7 +357,7 @@ class Application(tk.Frame):
             for i in app.sendAgainMsg.split('&'):
                 if i not in result:
                     result.append(i)
-            cm.BroadCast(result.pop(0))
+            cm.BroadCast(result.pop(0),documentname=openedDocumentAWS)
             if len(result) > 0:
                 app.sendAgainMsg = '&'.join(result)
                 print("b3d l pop wl cleaning", app.sendAgainMsg)
@@ -599,7 +600,7 @@ def changeOccured():
                     indOfLastChangeUserRcvd = list(app.chngesBroadcastByMe).index(change.split()[1].lstrip().rstrip())
                     # print("last rcvd by that usr: ", indOfLastChangeUserRcvd)
                     for i in range(indOfLastChangeUserRcvd + 1, len(list(app.chngesBroadcastByMe))):
-                        app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
+                        app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]],documentname=openn))
                         delay+= 800
                         # print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                         # app.chngeBuffer.append(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]]) # JSON DUMPSSSSSSS????????
@@ -884,18 +885,25 @@ def btn_cloud_document():
     app.justSent = ""
     app.listToSend = None
     app.sendAgainMsg = None
+    
+    docstring=cloud_document_text.get(1.0,"end-1c")
+    global openedDocumentAWS
+    openedDocumentAWS=docstring
+    cm.GetDocument(openedDocumentAWS)
+    print("created document on cloud with docstring is {}".format(docstring))
+    
 
-    cm.GetDocument()
     print('DO SOMETHING HERE')
 
 def btn_create_cloud_document():
     docstring=cloud_document_text.get(1.0,"end-1c")
     #print("docstring is {}".format(docstring))
     #print('DO ssssss here')
-    Global openedDocument
+    
     cm.CreateDocument(docstring)
     print("created document on cloud with docstring is {}".format(docstring))
-    openedDocument=docstring
+    global openedDocumentAWS
+    openedDocumentAWS=docstring
 
 
 cm = connection_manager()
