@@ -805,6 +805,10 @@ def convert_dict_to_text(textseq):
     CONSTANTS.INSERT_SEMPAHORE = False
 
 
+def btn_cloud_document():
+    print('DO SOMETHING HERE')
+
+
 cm = connection_manager()
 
 CONSTANTS.GLOBAL_NODE = node.TextSeq()
@@ -851,13 +855,14 @@ btn_unhightlight_users = ttk.Button(fr_buttons, bootstyle='danger-outline', text
 #btn_start = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Start writing", command=btn12strtwrtng)
 #btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
 btn_insert = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Paste", command=btn_insert)
+btn_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Paste", command=btn_cloud_document)
 # ------------------------------------ [ SET BUTTONS GRID ] ------------------------------------
 btn_open.grid(row=0, column=0, sticky="ew", padx=CONSTANTS.FIRST_BUTTON_SPACING_X, pady=CONSTANTS.FIRST_BUTTON_SPACING_Y)
 btn_save.grid(row=1, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_insert.grid(row=2, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_hightlight_users.grid(row=3, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_unhightlight_users.grid(row=4, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
-
+btn_cloud_document.grid(row=5, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 # =========================================================== [ LABELS ] ===========================================================
 num_users_str = 'Number of users: xxx'
 num_users_text = tk.Label(fr_buttons, text = num_users_str, justify=tk.LEFT, font=('', 10))
@@ -865,8 +870,8 @@ num_users_text = tk.Label(fr_buttons, text = num_users_str, justify=tk.LEFT, fon
 users_cursors_str = 'User 1: 1.0\nUser 2: 20.12\nUser 3: xxx.xx'
 users_cursors_text = tk.Label(fr_buttons, text = users_cursors_str, justify=tk.LEFT, font=('', 10))
 # ------------------------------------ [ SET LABELS GRID ] ------------------------------------
-num_users_text.grid(row=5, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
-users_cursors_text.grid(row=6, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+num_users_text.grid(row=6, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+users_cursors_text.grid(row=7, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
 
 
 # =========================================================== [ MAIN GUI GRIDS ] ===========================================================
