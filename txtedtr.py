@@ -565,6 +565,14 @@ def changeOccured():
         if ("freeze" in change) and change["freeze"] == "true":
             if ("document" in change):
                 documentfromserver = change["document"]
+
+                newTitle = "Doc: " + str(change["name"])
+                curr_doc_text.config(text=newTitle)
+                # docstring = cloud_document_text.delete(1.0, "end-1c")
+
+                global openedDocumentAWS
+                openedDocumentAWS = str(change["name"])
+
                 convert_dict_to_text(documentfromserver)
 
                 # print(documentfromserver)
