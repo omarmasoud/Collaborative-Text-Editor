@@ -221,7 +221,8 @@ def lambda_handler(event, context):
         msgdata=body['data']
         
         newdocstruct=body['documentStruct']
-        
+        if 'pos' in body:
+            NamesDict[connectionId][1]=body['pos']
         docname=body['docName']
         #getting document entry from the database
         doc=db_connection_manager.retreive_from_db(docname)
