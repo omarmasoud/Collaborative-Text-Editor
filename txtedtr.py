@@ -22,6 +22,8 @@ from ttkbootstrap.constants import *
 import customconstants as CONSTANTS
 from tkinter.filedialog import asksaveasfile, askopenfile
 
+import time
+
 lastRcvdChnge = -1
 
 openedDocumentAWS = "firstDocument"
@@ -64,7 +66,7 @@ def save_file2():
     window.title(f"Text Editor Application - {filepath}")
     txt_edit.edit_modified(0)
 
-
+global cursorPos
 def btndplcte():
     print(txt_edit.get(1.0, "end-1c"))
     print(txt_edit.index(tk.INSERT))
@@ -277,6 +279,7 @@ class Application(tk.Frame):
         self._after_id2 = self.after(1000, self.send_change)
 
     def sendNow(self, i):
+        global cursorPos
         if CONSTANTS.WRITING_SEMPAHORE == True:
             return
         if (len(self.localBuffer) - i) >= 4:
@@ -288,7 +291,8 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS", app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:i + 4], documentStruct=app.listToSend, documentname=openedDocumentAWS)
+            cursorPos = str(txt_edit.index(tk.INSERT))
+            cm.BroadCast(msg=self.localBuffer[i:i + 4], documentStruct=app.listToSend, documentname=openedDocumentAWS, pos=cursorPos)
 
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
@@ -304,8 +308,9 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS", app.listToSend)
+            cursorPos = str(txt_edit.index(tk.INSERT))
             cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend,
-                         documentname=openedDocumentAWS)
+                         documentname=openedDocumentAWS, pos=cursorPos)
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[len(self.localBuffer) - 1])["change_id"]
@@ -321,6 +326,7 @@ class Application(tk.Frame):
         #     self.counter = 0
 
     def send_change(self):
+        global cursorPos
         if CONSTANTS.WRITING_SEMPAHORE == True:
             return
         if app.sendAgainMsg is None:
@@ -345,8 +351,9 @@ class Application(tk.Frame):
                         self.chngeBuffer.append(json.dumps(lastChnge))
                         brdcstDct()
                         print("THIS", app.listToSend)
+                        cursorPos = str(txt_edit.index(tk.INSERT))
                         cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend,
-                                     documentname=openedDocumentAWS)
+                                     documentname=openedDocumentAWS, pos=cursorPos)
                         self.handle_wait()
                         # handle-wait
                         self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
@@ -535,12 +542,14 @@ def btnRcv():
 
 
 def changeOccured():
+    global cursorPos
     # global sendAgainSent
     # global sendAgainCtr
     global stopResend
     global sentOnce
     global lastChngeRcvdFromThisUsr
     global lastRcvdChnge
+    global isAlive_str
     while 1:
         change = cm.ws.recv()
         print(datetime.timestamp(datetime.now()))
@@ -549,19 +558,25 @@ def changeOccured():
         if change == None or change == ' ':
             print("empty response received")
         change = json.loads(change)
-        users = change['numusers']
-        num_users_text.config(text=f'Number of users: {users}')
+        try:
+            users = change['numusers']
 
-        ussers_locations = change['Userslocations']
-        temp_users_text = ''
-        index = 0
-        users_locations = json.loads(ussers_locations)
-        CONSTANTS.USER_LOCATIONS = users_locations
-        for usr in users_locations:
-            print(usr)
-            index += 1
-            temp_users_text += f'{index}. {usr[0]}: {usr[1]}\n'
-        users_cursors_text.config(text=temp_users_text)
+            num_users_text.config(text=f'Number of users: {users}')
+
+            ussers_locations = change['Userslocations']
+            temp_users_text = ''
+            index = 0
+            users_locations = json.loads(ussers_locations)
+            CONSTANTS.USER_LOCATIONS = users_locations
+            for usr in users_locations:
+                print(usr)
+                index += 1
+                temp_users_text += f'{index}. {usr[0]}: {usr[1]}\n'
+            users_cursors_text.config(text=temp_users_text)
+        except:
+            print("CRAAAAAAAAAAAAASHEEEEEEEEEEEED")
+            isAlive_str += "\nCrashed"
+            isAlive.config(text=isAlive_str)
         if ("freeze" in change) and change["freeze"] == "true":
             if ("document" in change):
                 documentfromserver = change["document"]
@@ -989,6 +1004,18 @@ def btn_create_cloud_document():
     insertingList = False
 
 
+def renewConn():
+    global cm
+    global isAlive_str
+    cm = connection_manager()
+    btn4cnct()
+    isAlive_str = "Connected"
+    isAlive.config(text=isAlive_str)
+    # time.sleep(3)
+    cm.GetDocument("firstDocument")
+
+
+
 cm = connection_manager()
 
 CONSTANTS.GLOBAL_NODE = node.TextSeq()
@@ -1037,6 +1064,10 @@ btn_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Cl
                                 command=btn_cloud_document)
 btn_create_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Create Doucment",
                                        command=btn_create_cloud_document)
+
+btn_renewConn = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Renew Conn",
+                                       command=renewConn)
+
 # ------------------------------------ [ SET BUTTONS GRID ] ------------------------------------
 btn_open.grid(row=0, column=0, sticky="ew", padx=CONSTANTS.FIRST_BUTTON_SPACING_X,
               pady=CONSTANTS.FIRST_BUTTON_SPACING_Y)
@@ -1048,6 +1079,9 @@ btn_unhightlight_users.grid(row=4, column=0, sticky="ew", padx=CONSTANTS.BUTTON_
                             pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_cloud_document.grid(row=5, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_create_cloud_document.grid(row=6, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X,
+                               pady=CONSTANTS.BUTTON_SPACING_Y)
+
+btn_renewConn.grid(row=15, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X,
                                pady=CONSTANTS.BUTTON_SPACING_Y)
 # =========================================================== [ LABELS ] ===========================================================
 cloud_document_str = 'Placeholder for cloud document'
@@ -1071,6 +1105,11 @@ curr_doc_text = tk.Label(fr_buttons, text=curr_doc_str, justify=tk.LEFT, font=('
 curr_doc_text.grid(row=8, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
 
 
+isAlive_str = 'Connected'
+isAlive = tk.Label(fr_buttons, text=isAlive_str, justify=tk.LEFT, font=('', 10), highlightthickness=4, highlightbackground="#37d3ff")
+isAlive.grid(row=16, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+
+
 # =========================================================== [ MAIN GUI GRIDS ] ===========================================================
 fr_buttons.grid(row=0, column=0, sticky="ns")
 txt_edit.grid(row=0, column=1, sticky="nsew")
@@ -1083,5 +1122,12 @@ old_delete = redir.register("delete", on_delete)
 
 
 btn4cnct()
+
+
 app = Application(window)
+
+
+time.sleep(3)
+cm.GetDocument("firstDocument")
+
 app.mainloop()
