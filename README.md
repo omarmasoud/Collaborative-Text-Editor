@@ -9,7 +9,8 @@ this is a collaborative text editor developed by tkinter GUI for frontend  AWS L
 logic for Conflict resolution 
 ---------------------------------------
 #### in order to run the project there is a setup_project.bat file you can run as long as you have python 3 and pip 3 on your machine, this batch file will install requirements in requirements.txt file
-#### you can also use pip install -r requirements.txt
+#### you can also use 
+pip install -r requirements.txt
 #### next to launch the project if you have your lambda instance up and running you just open txtedtr.py file and you will get navigated to the GUI
 ---------------------------------------
 *initially you will be set to no document, but you can create documents or navigate to documents on database by the last two buttons on the left pannel*
