@@ -67,5 +67,12 @@ res=t1.update_item(Key={"documentName":"firstDocument"},
     ReturnValues="UPDATED_NEW"
 
 )
-res=t1.get_item(Key={"documentName":"firstDocument"})
+t1.put_item(Item={
+                "documentName":"docName",
+                "currentVersion":"0",
+                "currentDocument":[],
+                "versions":[]
+                }
+                )
+res=t1.get_item(Key={"documentName":"docName"})
 print (res['Item']['currentVersion'])

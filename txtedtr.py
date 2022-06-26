@@ -1,3 +1,4 @@
+from ast import Global
 import tkinter as tk
 from threading import Thread
 from tkinter.filedialog import askopenfilename, asksaveasfilename
@@ -24,7 +25,7 @@ from tkinter.filedialog import asksaveasfile, askopenfile
 lastRcvdChnge = -1
 
 
-
+openedDocument="firstDocument"
 
 def open_file2():
     """Open a file for editing."""
@@ -425,6 +426,8 @@ def btnaddchar(indx1, indx2):
 
 
 def on_insert(*args):
+    # if CONSTANTS.WRITING_SEMPAHORE == True:
+    #     return
     # print("INS:", txt_edit.index(args[0]))
     indx1 = txt_edit.index(args[0])
     old_insert(*args)
@@ -519,6 +522,7 @@ def btnRcv():
 def changeOccured():
     # global sendAgainSent
     # global sendAgainCtr
+    global stopResend
     global sentOnce
     global lastChngeRcvdFromThisUsr
     global lastRcvdChnge
@@ -604,11 +608,12 @@ def changeOccured():
                 # print("entered heeeeeeeeeere22")
                 # EL AWL IF str(json.loads(change[-1])["lastBrdcstChnge"] AW str(json.loads(change[-1])["CHANGE_ID"] IN LIST str(lastChngeRcvdFromThisUsr[senderIDD]
                 # THEN IGNORE ITS A CHANGE I IMPLEMENTED
-                if str(json.loads(change[-1])["change_id"]).rstrip().lstrip() in lastChngeRcvdFromThisUsr[senderIDD]: #mmkn 2a check lw less than 2a5r 7aga 3mltha
+
+                if stopResend == 0 and str(json.loads(change[-1])["change_id"]).rstrip().lstrip() in lastChngeRcvdFromThisUsr[senderIDD]: #mmkn 2a check lw less than 2a5r 7aga 3mltha
                     # print("3MLTHA 2BL KDA. IGNORE") # ignore l2enny 3mlto
                     pass
                 else:
-                    if str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip() != str(json.loads(change[-1])["lastBrdcstChnge"]).rstrip().lstrip():
+                    if stopResend == 0 and str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip() != str(json.loads(change[-1])["lastBrdcstChnge"]).rstrip().lstrip():
                         # print(lastChngeRcvdFromThisUsr[senderIDD], " ", json.loads(change[-1])["lastBrdcstChnge"])
                         # print("ERRRORRRRRORRRRORRRR FI 7AGA MGTSH FL NOSSSS*****************")
                         print("errorrr")
@@ -623,6 +628,7 @@ def changeOccured():
                             app.sendAgainMsg = app.sendAgainMsg + '&' + msg
                             print(app.sendAgainMsg)
                         app.handle_wait()
+
                         # app.after(500, lambda j=msg: cm.BroadCast(j))
 
                         # if sentOnce == 3:
@@ -665,6 +671,9 @@ def receiveChange(op, elem, parent_id, child_id, id):
     global charId
     charId = id
     mnUserTany = 1
+
+    # if CONSTANTS.WRITING_SEMPAHORE == True:
+    #     return
 
     if op == "ins":  # add not delete
         if child_id == 'None':
@@ -820,21 +829,73 @@ def convert_dict_to_text(textseq):
     # CONSTANTS.WRITING_SEMPAHORE = False
     
     CONSTANTS.GLOBAL_NODE = node.TextSeq()
-    CONSTANTS.GLOBAL_NODE.printList()a
+    CONSTANTS.GLOBAL_NODE.printList()
+
     CONSTANTS.WRITING_SEMPAHORE = True
+    CONSTANTS.DELETE_SEMAPHORE = True #sh8aaaal?????
+    txt_edit.delete(1.0, tk.END)
     for i in range(1, len(textseq)):
         for j in range(0, len(textseq[i])):
             txt_edit.insert(f'{i}.{j}', textseq[i][j]['elem'])
+            if textseq[i][j]['parent_id'] == "None" and textseq[i][j]['child_id'] == "None":
+                CONSTANTS.GLOBAL_NODE.charPosCharr[i][j] = node.Node(textseq[i][j]['elem'],
+                                                                     float(textseq[i][j]['my_id']),
+                                                                     None, None)
+
+            elif textseq[i][j]['parent_id'] != "None" and textseq[i][j]['child_id'] == "None":
+                CONSTANTS.GLOBAL_NODE.charPosCharr[i][j] = node.Node(textseq[i][j]['elem'],
+                                                                     float(textseq[i][j]['my_id']),
+                                                                     float(textseq[i][j]['parent_id']),
+                                                                     None)
+
+            elif textseq[i][j]['parent_id'] == "None" and textseq[i][j]['child_id'] != "None":
+                CONSTANTS.GLOBAL_NODE.charPosCharr[i][j] = node.Node(textseq[i][j]['elem'],
+                                                                     float(textseq[i][j]['my_id']),
+                                                                     None, float(textseq[i][j]['child_id']))
+            else:
+                CONSTANTS.GLOBAL_NODE.charPosCharr[i][j] = node.Node(textseq[i][j]['elem'],
+                                                                     float(textseq[i][j]['my_id']),
+                                                                     float(textseq[i][j]['parent_id']),
+                                                                     float(textseq[i][j]['child_id']))
+            CONSTANTS.GLOBAL_NODE.charIdPos[CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].my_id] = [i, j]
 
     CONSTANTS.WRITING_SEMPAHORE = False
+    CONSTANTS.DELETE_SEMAPHORE = False
 
+stopResend = 0
 
 def btn_cloud_document():
+
+    global stopResend #h8ayyar l name bta3y?
+    CONSTANTS.WRITING_SEMPAHORE = True
+    CONSTANTS.DELETE_SEMAPHORE = True
+    # WAIT FOR RECEIVE
+    # STOP ALL SENDING
+    # STOP CHECKING BROADCAST BY ME
+    stopResend = 1
+
+    app.chngeBuffer = list()
+    app.localBuffer = list()
+    app.chngesBroadcastByMe = {}  # JSONDUMPS lw l msg list b awl id aw 2a5r id which?
+    app._after_id = None
+    app._after_id2 = None
+    app.counter = 0
+    app.end = 0
+    app.justSent = ""
+    app.listToSend = None
+    app.sendAgainMsg = None
+
     cm.GetDocument()
     print('DO SOMETHING HERE')
 
 def btn_create_cloud_document():
-    print('DO ssssss here')
+    docstring=cloud_document_text.get(1.0,"end-1c")
+    #print("docstring is {}".format(docstring))
+    #print('DO ssssss here')
+    Global openedDocument
+    cm.CreateDocument(docstring)
+    print("created document on cloud with docstring is {}".format(docstring))
+    openedDocument=docstring
 
 
 cm = connection_manager()

@@ -36,21 +36,23 @@ class connection_manager:
 
     def SendText(self,txt):
         self.ws.send(json.dumps({"action":"getText","text":txt}))
-
+    def CreateDocument(self,name):
+        self.ws.send(json.dumps({"action":"createDocument","name":name}))
     def SendTextDictionary(self,txtDict):
         self.ws.send(json.dumps({"action":"getText","text":txtDict}))
 
-# cm=connection_manager()
-# def reciverrr():
-#     while True:
-#             resp=cm.ws.recv()
-#             ### todo
-#             ## process recieved data
-#             print(resp)
+cm=connection_manager()
+cm.CreateDocument("omar and ghonaim")
+def reciverrr():
+    while True:
+            resp=cm.ws.recv()
+            ### todo
+            ## process recieved data
+            print(resp)
 
 #cm.GetDocument()
-# th=threading.Thread(target=reciverrr)
-# th.start()
+th=threading.Thread(target=reciverrr)
+th.start()
 # while True:
    
 #     cm.GetDocument()
