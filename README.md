@@ -17,7 +17,7 @@ logic for Conflict resolution
 pip install -r requirements.txt
 #### next to launch the project if you have your lambda instance up and running you just open txtedtr.py file and you will get navigated to the GUI
 ---------------------------------------
-*initially you will be set to no document, but you can create documents or navigate to documents on database by the last two buttons on the left pannel*
+*initially you will be set to default document (firstDocument), but you can create documents or navigate to documents on database by the last two buttons on the left pannel*
 *the label below will let you view number of users using this document and editing it and the other buttons let you open new document and create node structure for it using crdt*
 ---------------------------------------
 the provided .yaml files are **infrastructure as a code for AWS backend** you will have to use AWS cloud formation to deploy it or through AWS CLI
