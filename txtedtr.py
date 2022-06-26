@@ -913,11 +913,18 @@ def btn_cloud_document():
     app.listToSend = None
     app.sendAgainMsg = None
 
+
     docstring = cloud_document_text.get(1.0, "end-1c")
+    cloud_document_text.delete(1.0, "end-1c")
+
+    newTitle = "Doc: " + docstring
+    curr_doc_text.config(text=newTitle)
+    # docstring = cloud_document_text.delete(1.0, "end-1c")
+
     global openedDocumentAWS
     openedDocumentAWS = docstring
     cm.GetDocument(openedDocumentAWS)
-    print("created document on cloud with docstring is {}".format(docstring))
+    print("got document on cloud with docstring is {}".format(docstring))
 
     print('DO SOMETHING HERE')
 
@@ -927,10 +934,51 @@ def btn_create_cloud_document():
     # print("docstring is {}".format(docstring))
     # print('DO ssssss here')
 
+    #DELETE W FREE L 7GAT
+
     cm.CreateDocument(docstring)
     print("created document on cloud with docstring is {}".format(docstring))
     global openedDocumentAWS
     openedDocumentAWS = docstring
+
+    # MN HNAA
+    global stopResend  # h8ayyar l name bta3y?
+    CONSTANTS.WRITING_SEMPAHORE = True
+    stopResend = 1
+
+    app.chngeBuffer = list()
+    app.localBuffer = list()
+    app.chngesBroadcastByMe = {}  # JSONDUMPS lw l msg list b awl id aw 2a5r id which?
+    app._after_id = None
+    app._after_id2 = None
+    app.counter = 0
+    app.end = 0
+    app.justSent = ""
+    app.listToSend = None
+    app.sendAgainMsg = None
+
+    docstring = cloud_document_text.get(1.0, "end-1c")
+    cloud_document_text.delete(1.0, "end-1c")
+    newTitle = "Doc: " + docstring
+    curr_doc_text.config(text=newTitle)
+    # docstring = cloud_document_text.delete(1.0, "end-1c")
+
+    print("created document on cloud with docstring is {}".format(docstring))
+
+    global insertingList
+
+    CONSTANTS.GLOBAL_NODE = node.TextSeq()
+    CONSTANTS.GLOBAL_NODE.printList()
+
+    insertingList = True
+    txt_edit.delete("1.0", tk.END)
+
+    CONSTANTS.WRITING_SEMPAHORE = True
+    CONSTANTS.DELETE_SEMAPHORE = True  # sh8aaaal?????
+
+    CONSTANTS.WRITING_SEMPAHORE = False
+    CONSTANTS.DELETE_SEMAPHORE = False
+    insertingList = False
 
 
 cm = connection_manager()
@@ -998,14 +1046,22 @@ cloud_document_str = 'Placeholder for cloud document'
 cloud_document_text = ttk.Text(fr_buttons, wrap="word", bd=1, font=('', 8), width=1, height=1, highlightcolor='blue')
 
 num_users_str = 'Number of users:'
-num_users_text = tk.Label(fr_buttons, text=num_users_str, justify=tk.LEFT, font=('', 10))
+# num_users_text = tk.Label(fr_buttons, text=num_users_str, justify=tk.LEFT, font=('', 10))
+num_users_text = tk.Label(fr_buttons, text=num_users_str, justify=tk.LEFT, font=('', 10), relief="solid")
 
 users_cursors_str = 'User 1: 0.0'
 users_cursors_text = tk.Label(fr_buttons, text=users_cursors_str, justify=tk.LEFT, font=('', 10))
 # ------------------------------------ [ SET LABELS GRID ] ------------------------------------
 cloud_document_text.grid(row=7, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
-num_users_text.grid(row=8, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
-users_cursors_text.grid(row=9, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+num_users_text.grid(row=9, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+users_cursors_text.grid(row=10, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+
+
+
+curr_doc_str = 'Doc: Empty'
+curr_doc_text = tk.Label(fr_buttons, text=curr_doc_str, justify=tk.LEFT, font=('', 10), highlightthickness=4, highlightbackground="#37d3ff")
+curr_doc_text.grid(row=8, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+
 
 # =========================================================== [ MAIN GUI GRIDS ] ===========================================================
 fr_buttons.grid(row=0, column=0, sticky="ns")
