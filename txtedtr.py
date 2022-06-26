@@ -142,6 +142,7 @@ def btn8addmrk():
     txt_edit.tag_configure('c', background='red')
 
 
+
 def btn9addmrk():
     txt_edit.tag_delete('c')
     txt_edit.tag_add('c', txt_edit.index(tk.INSERT))
@@ -262,7 +263,7 @@ class Application(tk.Frame):
             self.after_cancel(self._after_id)
 
         # create a new job
-        self._after_id = self.after(200, self.send_change)
+        self._after_id = self.after(500, self.send_change)
 
     def handle_wait2(self):
         # cancel the old job
@@ -270,7 +271,7 @@ class Application(tk.Frame):
             self.after_cancel(self._after_id2)
 
         # create a new job
-        self._after_id2 = self.after(200, self.send_change)
+        self._after_id2 = self.after(500, self.send_change)
 
     def sendNow(self, i):
         if (len(self.localBuffer) - i) >= 4:
@@ -282,7 +283,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:i + 4],  documentStruct=app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:i + 4])
 
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
@@ -298,7 +299,7 @@ class Application(tk.Frame):
 
             brdcstDct()
             print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)])
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
             self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
@@ -322,7 +323,7 @@ class Application(tk.Frame):
                         # self.after(j, self.sendNow)
                         self.after(j, lambda x=i: self.sendNow(x))
                         i += 4
-                        j += 200
+                        j += 500
                     self.end = i - 4
                 else:
                     #2bl l broadcast. h7ot l lastBrdcstChnge
@@ -332,7 +333,7 @@ class Application(tk.Frame):
                         self.chngeBuffer.append(json.dumps(lastChnge))
                         brdcstDct()
                         print("THIS",app.listToSend)
-                        cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend)
+                        cm.BroadCast(msg=self.chngeBuffer)
                         self.handle_wait()
                         # handle-wait
                         self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
@@ -523,6 +524,20 @@ def changeOccured():
         if change == None or change == ' ':
             print("empty response received")
         change = json.loads(change)
+        users = change['numusers']
+        num_users_text.config(text = f'Number of users: {users}')
+
+        ussers_locations = change['Userslocations']
+        temp_users_text = ''
+        index = 0
+        users_locations = json.loads(ussers_locations)
+        CONSTANTS.USER_LOCATIONS = users_locations
+        for usr in users_locations:
+            print(usr)
+            index += 1
+            temp_users_text += f'{index}. {usr[0]}: {usr[1]}\n'
+        users_cursors_text.config(text = temp_users_text)
+
         if "delta" in change:  # and (chnge["freeze"] !="false"):
             senderIDD = "-1"
             if "senderID" in change:
@@ -548,7 +563,7 @@ def changeOccured():
                 # print("REQUEST TO SEND AGAAAAIIIINNNN")
                 # print(change)
                 print("sendAgain recvd")
-                delay = 100
+                delay = 500
                 if change.split()[1].lstrip().rstrip() == "-1":
                     # print("d5lt hna?")
                     for i in range(0, len(list(app.chngesBroadcastByMe))):
@@ -558,7 +573,7 @@ def changeOccured():
                         #
                         #     #cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                         app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
-                        delay+=100
+                        delay+=500
                         # print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                 else:
                     # print("tyb hna?")
@@ -566,7 +581,7 @@ def changeOccured():
                     # print("last rcvd by that usr: ", indOfLastChangeUserRcvd)
                     for i in range(indOfLastChangeUserRcvd + 1, len(list(app.chngesBroadcastByMe))):
                         app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
-                        delay+=100
+                        delay+=500
                         # print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                         # app.chngeBuffer.append(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]]) # JSON DUMPSSSSSSS????????
 
@@ -626,7 +641,6 @@ def changeOccured():
                                               chnge["child_id"] if chnge["child_id"] == 'None' else float(chnge["child_id"]),
                                               float(chnge["my_id"]))
                                 lastRcvdChnge = chnge["change_id"]
-
 
 
 
@@ -693,6 +707,36 @@ def brdcstDct():
 
 
 
+
+
+def highlight_users():
+    if len(CONSTANTS.USER_LOCATIONS) >= 0:
+        for tag in CONSTANTS.HIGHLIGHT_TAG:
+            txt_edit.tag_delete(tag)
+
+
+        index = 0
+        for user in CONSTANTS.USER_LOCATIONS:
+            tag_name = f'{user[0][0:3]}'
+            try:
+                user_x = user[1].split('.')[0]
+                user_y = user[1].split('.')[1]
+            except:
+                print('ERROR: USER LOCATIONS NOT STR')
+                return
+            txt_edit.tag_add(tag_name, f'{user_x}.{user_y}', f'{user_x}.{user_y+1}')
+            #txt_edit.tag_add(tag_name, f'1.{index}', f'1.{index+1}')
+            txt_edit.tag_configure(tag_name, background=CONSTANTS.HIGHLIGHT_COLORS[index % len(CONSTANTS.HIGHLIGHT_COLORS)])
+            CONSTANTS.HIGHLIGHT_TAG.append(tag_name)
+            index += 1
+
+
+def unhighlight_users():
+    if len(CONSTANTS.USER_LOCATIONS) >= 0:
+        for tag in CONSTANTS.HIGHLIGHT_TAG:
+            txt_edit.tag_delete(tag)
+
+
 def save_file():
     files = [('Text Document', '*.txt')]
     file = asksaveasfile(filetypes = files, defaultextension = files)
@@ -733,7 +777,6 @@ def open_file():
     CONSTANTS.GLOBAL_NODE.printList()
 
 
-
 def btn_insert():
     current_location = txt_edit.index(INSERT)
     current_location = current_location.split('.')
@@ -761,10 +804,10 @@ def convert_dict_to_text(textseq):
             txt_edit.insert(f'{i}.{j}', textseq.charPosCharr[i][j].get_elem())
     CONSTANTS.INSERT_SEMPAHORE = False
 
-# cm = ConnectionManager()
+
 cm = connection_manager()
-global n
-n = node.TextSeq()
+
+CONSTANTS.GLOBAL_NODE = node.TextSeq()
 
 window = ttk.Window(themename='darkly')
 
@@ -776,8 +819,7 @@ window = ttk.Window(themename='darkly')
 # ======================================================== [ GUI FUNCTION ] ========================================================
 
 
-BUTTON_SPACING = 5
-LABEL_SPACING = 10
+
 
 window.title("Collaborative Text Editor")
 window.rowconfigure(0, minsize=800, weight=1)
@@ -790,49 +832,44 @@ txt_edit = ttk.Text(window, wrap="word", bd=3, font='sans-serif', insertwidth=3,
 # frame holder for buttons
 fr_buttons = tk.Frame(window, relief=tk.RAISED)
 
+
+# =========================================================== [ BUTTONS ] ===========================================================
 btn_open = ttk.Button(fr_buttons, bootstyle='warning', text="Open", command=open_file)
 btn_save = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Save As...", command=save_file)
-btn_duplicate = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Duplicate", command=btndplcte)
+#btn_duplicate = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Duplicate", command=btndplcte)
 #btn_my_cursor = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Cursor", command=btn2crsr)
-btn_send_all = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Send All", command=btn3sndbtn)
-btn_connect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Connect", command=btn4cnct)
-btn_disconnect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Disconnect", command=btn5dscnct)
+#btn_send_all = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Send All", command=btn3sndbtn)
+#btn_connect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Connect", command=btn4cnct)
+#btn_disconnect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Disconnect", command=btn5dscnct)
 #btn_add_char = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add This Char To Dict", command=btn7addchar)
-btn_add_mark1 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor", command=btn8addmrk)
-btn_add_mark2 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor2", command=btn9addmrk)
+#btn_add_mark1 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor", command=btn8addmrk)
+#btn_add_mark2 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor2", command=btn9addmrk)
+btn_hightlight_users = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Highlight Users", command=highlight_users)
+btn_unhightlight_users = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Remove Highlights", command=unhighlight_users)
 #btn_modified = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Modified?", command=btn10chckmod)
 #btn_consistency = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Consistency Prob?", command=btn11fixprob)
 #btn_start = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Start writing", command=btn12strtwrtng)
 #btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
 btn_insert = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Paste", command=btn_insert)
-btn_test_dict_conv = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Convert Dict", command=convert_dict_to_text)
+# ------------------------------------ [ SET BUTTONS GRID ] ------------------------------------
+btn_open.grid(row=0, column=0, sticky="ew", padx=CONSTANTS.FIRST_BUTTON_SPACING_X, pady=CONSTANTS.FIRST_BUTTON_SPACING_Y)
+btn_save.grid(row=1, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
+btn_insert.grid(row=2, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
+btn_hightlight_users.grid(row=3, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
+btn_unhightlight_users.grid(row=4, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 
+# =========================================================== [ LABELS ] ===========================================================
 num_users_str = 'Number of users: xxx'
 num_users_text = tk.Label(fr_buttons, text = num_users_str, justify=tk.LEFT, font=('', 10))
+
 users_cursors_str = 'User 1: 1.0\nUser 2: 20.12\nUser 3: xxx.xx'
 users_cursors_text = tk.Label(fr_buttons, text = users_cursors_str, justify=tk.LEFT, font=('', 10))
-
-btn_open.grid(row=0, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING + 5)
-btn_save.grid(row=1, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_duplicate.grid(row=2, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_my_cursor.grid(row=3, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_send_all.grid(row=4, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_connect.grid(row=5, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_disconnect.grid(row=6, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_add_char.grid(row=7, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_add_mark1.grid(row=8, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_add_mark2.grid(row=9, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_modified.grid(row=10, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_consistency.grid(row=11, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_start.grid(row=12, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-#btn_temp.grid(row=13, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-btn_insert.grid(row=10, column=0, sticky="ew", padx=5, pady=BUTTON_SPACING)
-
-num_users_text.grid(row=11, column=0, stick='ew', ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
-users_cursors_text.grid(row=12, column=0, stick='ew',ipadx=LABEL_SPACING, ipady=LABEL_SPACING, padx=BUTTON_SPACING, pady=BUTTON_SPACING)
+# ------------------------------------ [ SET LABELS GRID ] ------------------------------------
+num_users_text.grid(row=5, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
+users_cursors_text.grid(row=6, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
 
 
-
+# =========================================================== [ MAIN GUI GRIDS ] ===========================================================
 fr_buttons.grid(row=0, column=0, sticky="ns")
 txt_edit.grid(row=0, column=1, sticky="nsew")
 
@@ -845,5 +882,7 @@ old_delete = redir.register("delete", on_delete)
 # ======================================================== [ END OF GUI ] ========================================================
 
 
+btn4cnct()
 app = Application(window)
 app.mainloop()
+
