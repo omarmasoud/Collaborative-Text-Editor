@@ -855,7 +855,7 @@ btn_unhightlight_users = ttk.Button(fr_buttons, bootstyle='danger-outline', text
 #btn_start = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Start writing", command=btn12strtwrtng)
 #btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
 btn_insert = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Paste", command=btn_insert)
-btn_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Paste", command=btn_cloud_document)
+btn_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Cloud Documents", command=btn_cloud_document)
 # ------------------------------------ [ SET BUTTONS GRID ] ------------------------------------
 btn_open.grid(row=0, column=0, sticky="ew", padx=CONSTANTS.FIRST_BUTTON_SPACING_X, pady=CONSTANTS.FIRST_BUTTON_SPACING_Y)
 btn_save.grid(row=1, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
