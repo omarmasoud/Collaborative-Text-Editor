@@ -17,7 +17,6 @@ import time
 
 from datetime import datetime
 
-
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import customconstants as CONSTANTS
@@ -25,8 +24,10 @@ from tkinter.filedialog import asksaveasfile, askopenfile
 
 lastRcvdChnge = -1
 
-openedDocumentAWS="firstDocument"
-#openedDocument="firstDocument"
+openedDocumentAWS = "firstDocument"
+
+
+# openedDocument="firstDocument"
 
 def open_file2():
     """Open a file for editing."""
@@ -87,7 +88,8 @@ def btn3sndbtn():
     print(txt_edit.get(1.0, "end-1c"))
     print('hi')
     txt_msg = txt_edit.get(1.0, "end-1c")
-    cm.BroadCast(txt_msg,documentname=openedDocumentAWS)
+    cm.BroadCast(txt_msg, documentname=openedDocumentAWS)
+
 
 # buffEnable = 0
 # def senderBuffHandler():
@@ -142,7 +144,6 @@ def btn7addchar():
 def btn8addmrk():
     txt_edit.tag_add('c', 1.2, 1.3)
     txt_edit.tag_configure('c', background='red')
-
 
 
 def btn9addmrk():
@@ -246,7 +247,7 @@ class Application(tk.Frame):
         tk.Frame.__init__(self)
         self.chngeBuffer = list()
         self.localBuffer = list()
-        self.chngesBroadcastByMe = {} #JSONDUMPS lw l msg list b awl id aw 2a5r id which?
+        self.chngesBroadcastByMe = {}  # JSONDUMPS lw l msg list b awl id aw 2a5r id which?
 
         self._after_id = None
         self._after_id2 = None
@@ -279,37 +280,40 @@ class Application(tk.Frame):
         if CONSTANTS.WRITING_SEMPAHORE == True:
             return
         if (len(self.localBuffer) - i) >= 4:
-            lastChnge = json.loads(self.localBuffer.pop(i+3))
+            lastChnge = json.loads(self.localBuffer.pop(i + 3))
             lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(
                 list(self.chngesBroadcastByMe)) > 0 else -1
             # self.chngeBuffer.append(json.dumps(lastChnge))
-            self.localBuffer.insert(i+3, json.dumps(lastChnge))
+            self.localBuffer.insert(i + 3, json.dumps(lastChnge))
 
             brdcstDct()
-            print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:i + 4], documentStruct=app.listToSend,documentname=openedDocumentAWS)
+            print("THIS", app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:i + 4], documentStruct=app.listToSend, documentname=openedDocumentAWS)
 
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
-            self.justSent = json.loads(self.localBuffer[i+3])["change_id"]
+            self.justSent = json.loads(self.localBuffer[i + 3])["change_id"]
             # print(self.justSent)
 
             self.chngesBroadcastByMe[json.loads(self.localBuffer[i + 3])["change_id"]] = self.localBuffer[i:i + 4]
         else:
-            lastChnge = json.loads(self.localBuffer.pop(len(self.localBuffer)-1))
+            lastChnge = json.loads(self.localBuffer.pop(len(self.localBuffer) - 1))
             lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(
                 list(self.chngesBroadcastByMe)) > 0 else -1
             self.localBuffer.append(json.dumps(lastChnge))
 
             brdcstDct()
-            print("THIS",app.listToSend)
-            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend,documentname=openedDocumentAWS)
+            print("THIS", app.listToSend)
+            cm.BroadCast(msg=self.localBuffer[i:len(self.localBuffer)], documentStruct=app.listToSend,
+                         documentname=openedDocumentAWS)
             self.handle_wait()
             # 23MLHA REGISTER FL SENT
-            self.justSent = json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]
+            self.justSent = json.loads(self.localBuffer[len(self.localBuffer) - 1])["change_id"]
             # print(self.justSent)
 
-            self.chngesBroadcastByMe[json.loads(self.localBuffer[len(self.localBuffer)-1])["change_id"]] = self.localBuffer[i:len(self.localBuffer)]
+            self.chngesBroadcastByMe[
+                json.loads(self.localBuffer[len(self.localBuffer) - 1])["change_id"]] = self.localBuffer[
+                                                                                        i:len(self.localBuffer)]
             # print("DIIIICCCTTTT", self.chngesBroadcastByMe)
             # clear localBuffer now
         #     self.counter += 4
@@ -320,7 +324,8 @@ class Application(tk.Frame):
         if CONSTANTS.WRITING_SEMPAHORE == True:
             return
         if app.sendAgainMsg is None:
-            if len(self.localBuffer) == 0 or (len(self.localBuffer) != 0 and (float(json.loads(self.localBuffer[-1])["change_id"]) <= float(self.justSent))):
+            if len(self.localBuffer) == 0 or (len(self.localBuffer) != 0 and (
+                    float(json.loads(self.localBuffer[-1])["change_id"]) <= float(self.justSent))):
                 if len(self.chngeBuffer) > 4:
                     i = 0
                     j = 0
@@ -332,19 +337,21 @@ class Application(tk.Frame):
                         j += 1000
                     self.end = i - 4
                 else:
-                    #2bl l broadcast. h7ot l lastBrdcstChnge
+                    # 2bl l broadcast. h7ot l lastBrdcstChnge
                     if len(self.chngeBuffer) != 0:
-                        lastChnge = json.loads(self.chngeBuffer.pop(-1)) # watch HEEEEREEE KAN EMPTY
-                        lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(list(self.chngesBroadcastByMe)) > 0 else -1
+                        lastChnge = json.loads(self.chngeBuffer.pop(-1))  # watch HEEEEREEE KAN EMPTY
+                        lastChnge["lastBrdcstChnge"] = list(self.chngesBroadcastByMe)[-1] if len(
+                            list(self.chngesBroadcastByMe)) > 0 else -1
                         self.chngeBuffer.append(json.dumps(lastChnge))
                         brdcstDct()
-                        print("THIS",app.listToSend)
-                        cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend,documentname=openedDocumentAWS)
+                        print("THIS", app.listToSend)
+                        cm.BroadCast(msg=self.chngeBuffer, documentStruct=app.listToSend,
+                                     documentname=openedDocumentAWS)
                         self.handle_wait()
                         # handle-wait
                         self.chngesBroadcastByMe[json.loads(self.chngeBuffer[-1])["change_id"]] = self.chngeBuffer[0:]
 
-                        #23MLHA REGISTER FL SENT
+                        # 23MLHA REGISTER FL SENT
                         # print(self.chngeBuffer)
                         # print(self.chngesBroadcastByMe)
                 self.chngeBuffer.clear()
@@ -357,7 +364,7 @@ class Application(tk.Frame):
             for i in app.sendAgainMsg.split('&'):
                 if i not in result:
                     result.append(i)
-            cm.BroadCast(result.pop(0),documentname=openedDocumentAWS)
+            cm.BroadCast(result.pop(0), documentname=openedDocumentAWS)
             if len(result) > 0:
                 app.sendAgainMsg = '&'.join(result)
                 print("b3d l pop wl cleaning", app.sendAgainMsg)
@@ -391,12 +398,13 @@ class Application(tk.Frame):
         #             # time.sleep(0.6)
         #     self.chngeBuffer.clear()
 
-
+insertingList = False
 
 def btnaddchar(indx1, indx2):
     global lastRcvdChnge
     global mnUserTany
     global charId
+    global insertingList
 
     # get position l cursor
     # print(txt_edit.index(tk.INSERT))
@@ -412,15 +420,16 @@ def btnaddchar(indx1, indx2):
     elem = txt_edit.get(ind)
 
     # print(CONSTANTS.GLOBAL_NODE.charIdPos)
-    if mnUserTany:
-        CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy, 1, charId)
-        mnUserTany = 0
-    else:
-        newChange = CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy)
-        newChange['lastRcvdChnge'] = str(lastRcvdChnge)
-        # print(newChange)
-        app.chngeBuffer.append(json.dumps(newChange))
-        app.handle_wait()
+    if insertingList == False:
+        if mnUserTany:
+            CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy, 1, charId)
+            mnUserTany = 0
+        else:
+            newChange = CONSTANTS.GLOBAL_NODE.add_char_here(elem, posx, posy)
+            newChange['lastRcvdChnge'] = str(lastRcvdChnge)
+            # print(newChange)
+            app.chngeBuffer.append(json.dumps(newChange))
+            app.handle_wait()
         # cm.BroadCast(json.dumps(newChange))
     # print(CONSTANTS.GLOBAL_NODE.charIdPos) RAGGA3
     # CONSTANTS.GLOBAL_NODE.printList() RAGGA3
@@ -508,6 +517,7 @@ lastChngeRcvdFromThisUsr = {}
 # sendAgainCtr = {}
 sentOnce = 0
 
+
 def btnRcv():
     global cm
     global n
@@ -536,7 +546,7 @@ def changeOccured():
             print("empty response received")
         change = json.loads(change)
         users = change['numusers']
-        num_users_text.config(text = f'Number of users: {users}')
+        num_users_text.config(text=f'Number of users: {users}')
 
         ussers_locations = change['Userslocations']
         temp_users_text = ''
@@ -547,16 +557,13 @@ def changeOccured():
             print(usr)
             index += 1
             temp_users_text += f'{index}. {usr[0]}: {usr[1]}\n'
-        users_cursors_text.config(text = temp_users_text)
-        if ("freeze" in change) and change["freeze"] =="true":
+        users_cursors_text.config(text=temp_users_text)
+        if ("freeze" in change) and change["freeze"] == "true":
             if ("document" in change):
-                documentfromserver=change["document"]
+                documentfromserver = change["document"]
                 convert_dict_to_text(documentfromserver)
 
-
-                #print(documentfromserver)
-
-                
+                # print(documentfromserver)
 
         if "delta" in change:  # and (chnge["freeze"] !="false"):
             senderIDD = "-1"
@@ -592,16 +599,19 @@ def changeOccured():
                         #     #print(app.chngeBuffer)
                         #
                         #     #cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
-                        app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
-                        delay+= 800
+                        app.after(delay,
+                                  lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]]))
+                        delay += 800
                         # print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                 else:
                     # print("tyb hna?")
                     indOfLastChangeUserRcvd = list(app.chngesBroadcastByMe).index(change.split()[1].lstrip().rstrip())
                     # print("last rcvd by that usr: ", indOfLastChangeUserRcvd)
                     for i in range(indOfLastChangeUserRcvd + 1, len(list(app.chngesBroadcastByMe))):
-                        app.after(delay, lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]],documentname=openn))
-                        delay+= 800
+                        app.after(delay,
+                                  lambda x=i: cm.BroadCast(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[x]],
+                                                           documentname=openn))
+                        delay += 800
                         # print("resending: ", app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]])
                         # app.chngeBuffer.append(app.chngesBroadcastByMe[list(app.chngesBroadcastByMe)[i]]) # JSON DUMPSSSSSSS????????
 
@@ -610,11 +620,13 @@ def changeOccured():
                 # EL AWL IF str(json.loads(change[-1])["lastBrdcstChnge"] AW str(json.loads(change[-1])["CHANGE_ID"] IN LIST str(lastChngeRcvdFromThisUsr[senderIDD]
                 # THEN IGNORE ITS A CHANGE I IMPLEMENTED
 
-                if stopResend == 0 and str(json.loads(change[-1])["change_id"]).rstrip().lstrip() in lastChngeRcvdFromThisUsr[senderIDD]: #mmkn 2a check lw less than 2a5r 7aga 3mltha
+                if stopResend == 0 and str(json.loads(change[-1])["change_id"]).rstrip().lstrip() in \
+                        lastChngeRcvdFromThisUsr[senderIDD]:  # mmkn 2a check lw less than 2a5r 7aga 3mltha
                     # print("3MLTHA 2BL KDA. IGNORE") # ignore l2enny 3mlto
                     pass
                 else:
-                    if stopResend == 0 and str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip() != str(json.loads(change[-1])["lastBrdcstChnge"]).rstrip().lstrip():
+                    if stopResend == 0 and str(lastChngeRcvdFromThisUsr[senderIDD][-1]).rstrip().lstrip() != str(
+                            json.loads(change[-1])["lastBrdcstChnge"]).rstrip().lstrip():
                         # print(lastChngeRcvdFromThisUsr[senderIDD], " ", json.loads(change[-1])["lastBrdcstChnge"])
                         # print("ERRRORRRRRORRRRORRRR FI 7AGA MGTSH FL NOSSSS*****************")
                         print("errorrr")
@@ -639,7 +651,7 @@ def changeOccured():
                         #     app.after(500, lambda j=msg: cm.BroadCast(j))
                         # else:
                         #     sentOnce += 1
-                        #sendAgainCtr[senderIDD] = 'done'
+                        # sendAgainCtr[senderIDD] = 'done'
 
 
                     else:
@@ -655,16 +667,15 @@ def changeOccured():
                             chnge = json.loads(chnge)
 
                             if "operation" in chnge:
-
                                 # if chnge["operation"] == "ins" or chnge["operation"] == "del":
                                 receiveChange(chnge["operation"],
                                               chnge["elem"],
-                                              chnge["parent_id"] if chnge["parent_id"] == 'None' else float(chnge["parent_id"]),
-                                              chnge["child_id"] if chnge["child_id"] == 'None' else float(chnge["child_id"]),
+                                              chnge["parent_id"] if chnge["parent_id"] == 'None' else float(
+                                                  chnge["parent_id"]),
+                                              chnge["child_id"] if chnge["child_id"] == 'None' else float(
+                                                  chnge["child_id"]),
                                               float(chnge["my_id"]))
                                 lastRcvdChnge = chnge["change_id"]
-
-
 
 
 def receiveChange(op, elem, parent_id, child_id, id):
@@ -701,23 +712,22 @@ def receiveChange(op, elem, parent_id, child_id, id):
         deleteThere(pos)
 
 
-
 def brdcstDct():
     brdcstDct = CONSTANTS.GLOBAL_NODE.charPosCharr.copy()
     # CONSTANTS.GLOBAL_NODE.printList()
 
     for i in range(1, len(brdcstDct)):
-        #WALLA 23ML COPY KDA KDA????
+        # WALLA 23ML COPY KDA KDA????
         # if len(CONSTANTS.GLOBAL_NODE.charPosCharr[i]) > 0:
         brdcstDct[i] = CONSTANTS.GLOBAL_NODE.charPosCharr[i].copy()
         for j in range(0, len(brdcstDct[i])):
             if brdcstDct[i][j] is not None:
                 brdcstDct[i][j] = {
-                                "elem": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].elem),
-                                "my_id": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].my_id),
-                                "parent_id": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].parent_id),
-                                "child_id": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].child_id)
-                            }
+                    "elem": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].elem),
+                    "my_id": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].my_id),
+                    "parent_id": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].parent_id),
+                    "child_id": str(CONSTANTS.GLOBAL_NODE.charPosCharr[i][j].child_id)
+                }
                 # brdcstDct[i][j] = json.dumps(brdcstDct[i][j])
                 # print(json.loads(brdcstDct[i][j]))
     print(brdcstDct)
@@ -731,14 +741,10 @@ def brdcstDct():
     # print(CONSTANTS.GLOBAL_NODE.charPosCharr[1][2]['parent_id'])
 
 
-
-
-
 def highlight_users():
     if len(CONSTANTS.USER_LOCATIONS) >= 0:
         for tag in CONSTANTS.HIGHLIGHT_TAG:
             txt_edit.tag_delete(tag)
-
 
         index = 0
         for user in CONSTANTS.USER_LOCATIONS:
@@ -749,9 +755,10 @@ def highlight_users():
             except:
                 print('ERROR: USER LOCATIONS NOT STR')
                 return
-            txt_edit.tag_add(tag_name, f'{user_x}.{user_y}', f'{user_x}.{user_y+1}')
-            #txt_edit.tag_add(tag_name, f'1.{index}', f'1.{index+1}')
-            txt_edit.tag_configure(tag_name, background=CONSTANTS.HIGHLIGHT_COLORS[index % len(CONSTANTS.HIGHLIGHT_COLORS)])
+            txt_edit.tag_add(tag_name, f'{user_x}.{user_y}', f'{user_x}.{user_y + 1}')
+            # txt_edit.tag_add(tag_name, f'1.{index}', f'1.{index+1}')
+            txt_edit.tag_configure(tag_name,
+                                   background=CONSTANTS.HIGHLIGHT_COLORS[index % len(CONSTANTS.HIGHLIGHT_COLORS)])
             CONSTANTS.HIGHLIGHT_TAG.append(tag_name)
             index += 1
 
@@ -764,11 +771,11 @@ def unhighlight_users():
 
 def save_file():
     files = [('Text Document', '*.txt')]
-    file = asksaveasfile(filetypes = files, defaultextension = files)
+    file = asksaveasfile(filetypes=files, defaultextension=files)
     file.write(txt_edit.get("1.0", END))
 
 
-#msgtobesent={
+# msgtobesent={
 #    "freeze": freezevalue,
 #    "senderID":str(sender),
 #    "delta": Data,
@@ -778,7 +785,7 @@ def save_file():
 
 
 def open_file():
-    file = askopenfile(mode ='r', filetypes =[('Text Document', '*.txt')])
+    file = askopenfile(mode='r', filetypes=[('Text Document', '*.txt')])
     if file is not None:
         content = file.read()
         CONSTANTS.GLOBAL_NODE = node.TextSeq()
@@ -828,12 +835,15 @@ def convert_dict_to_text(textseq):
     #     for j in range(0, len(textseq.charPosCharr[i])):
     #         txt_edit.insert(f'{i}.{j}', textseq.charPosCharr[i][j].get_elem())
     # CONSTANTS.WRITING_SEMPAHORE = False
-    
+    global insertingList
+
     CONSTANTS.GLOBAL_NODE = node.TextSeq()
     CONSTANTS.GLOBAL_NODE.printList()
 
     CONSTANTS.WRITING_SEMPAHORE = True
-    CONSTANTS.DELETE_SEMAPHORE = True #sh8aaaal?????
+    CONSTANTS.DELETE_SEMAPHORE = True  # sh8aaaal?????
+    insertingList = True
+
     txt_edit.delete(1.0, tk.END)
     for i in range(1, len(textseq)):
         for j in range(0, len(textseq[i])):
@@ -862,12 +872,14 @@ def convert_dict_to_text(textseq):
 
     CONSTANTS.WRITING_SEMPAHORE = False
     CONSTANTS.DELETE_SEMAPHORE = False
+    insertingList = False
+
 
 stopResend = 0
 
-def btn_cloud_document():
 
-    global stopResend #h8ayyar l name bta3y?
+def btn_cloud_document():
+    global stopResend  # h8ayyar l name bta3y?
     CONSTANTS.WRITING_SEMPAHORE = True
     CONSTANTS.DELETE_SEMAPHORE = True
     # WAIT FOR RECEIVE
@@ -885,25 +897,25 @@ def btn_cloud_document():
     app.justSent = ""
     app.listToSend = None
     app.sendAgainMsg = None
-    
-    docstring=cloud_document_text.get(1.0,"end-1c")
+
+    docstring = cloud_document_text.get(1.0, "end-1c")
     global openedDocumentAWS
-    openedDocumentAWS=docstring
+    openedDocumentAWS = docstring
     cm.GetDocument(openedDocumentAWS)
     print("created document on cloud with docstring is {}".format(docstring))
-    
 
     print('DO SOMETHING HERE')
 
+
 def btn_create_cloud_document():
-    docstring=cloud_document_text.get(1.0,"end-1c")
-    #print("docstring is {}".format(docstring))
-    #print('DO ssssss here')
-    
+    docstring = cloud_document_text.get(1.0, "end-1c")
+    # print("docstring is {}".format(docstring))
+    # print('DO ssssss here')
+
     cm.CreateDocument(docstring)
     print("created document on cloud with docstring is {}".format(docstring))
     global openedDocumentAWS
-    openedDocumentAWS=docstring
+    openedDocumentAWS = docstring
 
 
 cm = connection_manager()
@@ -920,12 +932,9 @@ window = ttk.Window(themename='darkly')
 # ======================================================== [ GUI FUNCTION ] ========================================================
 
 
-
-
 window.title("Collaborative Text Editor")
 window.rowconfigure(0, minsize=800, weight=1)
 window.columnconfigure(1, minsize=800, weight=1)
-
 
 # main text field
 txt_edit = ttk.Text(window, wrap="word", bd=3, font='sans-serif', insertwidth=3, highlightcolor='blue')
@@ -933,49 +942,55 @@ txt_edit = ttk.Text(window, wrap="word", bd=3, font='sans-serif', insertwidth=3,
 # frame holder for buttons
 fr_buttons = tk.Frame(window, relief=tk.RAISED)
 
-
 # =========================================================== [ BUTTONS ] ===========================================================
 btn_open = ttk.Button(fr_buttons, bootstyle='warning', text="Open", command=open_file)
 btn_save = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Save As...", command=save_file)
-#btn_duplicate = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Duplicate", command=btndplcte)
-#btn_my_cursor = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Cursor", command=btn2crsr)
-#btn_send_all = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Send All", command=btn3sndbtn)
-#btn_connect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Connect", command=btn4cnct)
-#btn_disconnect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Disconnect", command=btn5dscnct)
-#btn_add_char = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add This Char To Dict", command=btn7addchar)
-#btn_add_mark1 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor", command=btn8addmrk)
-#btn_add_mark2 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor2", command=btn9addmrk)
-btn_hightlight_users = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Highlight Users", command=highlight_users)
-btn_unhightlight_users = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Remove Highlights", command=unhighlight_users)
-#btn_modified = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Modified?", command=btn10chckmod)
-#btn_consistency = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Consistency Prob?", command=btn11fixprob)
-#btn_start = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Start writing", command=btn12strtwrtng)
-#btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
+# btn_duplicate = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Duplicate", command=btndplcte)
+# btn_my_cursor = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Cursor", command=btn2crsr)
+# btn_send_all = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Send All", command=btn3sndbtn)
+# btn_connect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Connect", command=btn4cnct)
+# btn_disconnect = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Disconnect", command=btn5dscnct)
+# btn_add_char = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add This Char To Dict", command=btn7addchar)
+# btn_add_mark1 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor", command=btn8addmrk)
+# btn_add_mark2 = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Add Mark for Cursor2", command=btn9addmrk)
+btn_hightlight_users = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Highlight Users",
+                                  command=highlight_users)
+btn_unhightlight_users = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Remove Highlights",
+                                    command=unhighlight_users)
+# btn_modified = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Modified?", command=btn10chckmod)
+# btn_consistency = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Consistency Prob?", command=btn11fixprob)
+# btn_start = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Start writing", command=btn12strtwrtng)
+# btn_temp = ttk.Button(fr_buttons, bootstyle='danger-outline', text="USER TANY 7T H", command=btn13anthr)
 btn_insert = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Paste", command=btn_insert)
-btn_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Cloud Documents", command=btn_cloud_document)
-btn_create_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Create Doucment", command=btn_create_cloud_document)
+btn_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Cloud Documents",
+                                command=btn_cloud_document)
+btn_create_cloud_document = ttk.Button(fr_buttons, bootstyle='danger-outline', text="Create Doucment",
+                                       command=btn_create_cloud_document)
 # ------------------------------------ [ SET BUTTONS GRID ] ------------------------------------
-btn_open.grid(row=0, column=0, sticky="ew", padx=CONSTANTS.FIRST_BUTTON_SPACING_X, pady=CONSTANTS.FIRST_BUTTON_SPACING_Y)
+btn_open.grid(row=0, column=0, sticky="ew", padx=CONSTANTS.FIRST_BUTTON_SPACING_X,
+              pady=CONSTANTS.FIRST_BUTTON_SPACING_Y)
 btn_save.grid(row=1, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_insert.grid(row=2, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
-btn_hightlight_users.grid(row=3, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
-btn_unhightlight_users.grid(row=4, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
+btn_hightlight_users.grid(row=3, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X,
+                          pady=CONSTANTS.BUTTON_SPACING_Y)
+btn_unhightlight_users.grid(row=4, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X,
+                            pady=CONSTANTS.BUTTON_SPACING_Y)
 btn_cloud_document.grid(row=5, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
-btn_create_cloud_document.grid(row=6, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X, pady=CONSTANTS.BUTTON_SPACING_Y)
+btn_create_cloud_document.grid(row=6, column=0, sticky="ew", padx=CONSTANTS.BUTTON_SPACING_X,
+                               pady=CONSTANTS.BUTTON_SPACING_Y)
 # =========================================================== [ LABELS ] ===========================================================
 cloud_document_str = 'Placeholder for cloud document'
-cloud_document_text = ttk.Text(fr_buttons, wrap="word", bd=1, font=('', 8),width=1,height=1, highlightcolor='blue')
+cloud_document_text = ttk.Text(fr_buttons, wrap="word", bd=1, font=('', 8), width=1, height=1, highlightcolor='blue')
 
 num_users_str = 'Number of users:'
-num_users_text = tk.Label(fr_buttons, text = num_users_str, justify=tk.LEFT, font=('', 10))
+num_users_text = tk.Label(fr_buttons, text=num_users_str, justify=tk.LEFT, font=('', 10))
 
 users_cursors_str = 'User 1: 0.0'
-users_cursors_text = tk.Label(fr_buttons, text = users_cursors_str, justify=tk.LEFT, font=('', 10))
+users_cursors_text = tk.Label(fr_buttons, text=users_cursors_str, justify=tk.LEFT, font=('', 10))
 # ------------------------------------ [ SET LABELS GRID ] ------------------------------------
 cloud_document_text.grid(row=7, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
 num_users_text.grid(row=8, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
 users_cursors_text.grid(row=9, column=0, sticky="ew", padx=CONSTANTS.LABEL_SPACING_X, pady=CONSTANTS.LABEL_SPACING_Y)
-
 
 # =========================================================== [ MAIN GUI GRIDS ] ===========================================================
 fr_buttons.grid(row=0, column=0, sticky="ns")
@@ -985,12 +1000,9 @@ redir = WidgetRedirector(txt_edit)
 old_insert = redir.register("insert", on_insert)
 old_delete = redir.register("delete", on_delete)
 
-
-
 # ======================================================== [ END OF GUI ] ========================================================
 
 
 btn4cnct()
 app = Application(window)
 app.mainloop()
-
