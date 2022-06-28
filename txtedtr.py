@@ -23,7 +23,7 @@ import customconstants as CONSTANTS
 from tkinter.filedialog import asksaveasfile, askopenfile
 
 import time
-
+mythread=None
 lastRcvdChnge = -1
 
 openedDocumentAWS = "firstDocument"
@@ -103,7 +103,8 @@ def btn3sndbtn():
 def btn4cnct():
     # cm.Connect()
     print("connected")
-    Thread(target=changeOccured).start()
+    global mythread
+    mythread=Thread(target=changeOccured).start()
     # Thread(target=senderBuffHandler).start()
 
 
@@ -782,7 +783,7 @@ def highlight_users():
             except:
                 print('ERROR: USER LOCATIONS NOT STR')
                 return
-            txt_edit.tag_add(tag_name, f'{user_x}.{user_y}', f'{user_x}.{user_y + 1}')
+            txt_edit.tag_add(tag_name, f'{user_x}.{int(user_y) - 1}', f'{user_x}.{user_y}')
             # txt_edit.tag_add(tag_name, f'1.{index}', f'1.{index+1}')
             txt_edit.tag_configure(tag_name,
                                    background=CONSTANTS.HIGHLIGHT_COLORS[index % len(CONSTANTS.HIGHLIGHT_COLORS)])
